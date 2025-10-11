@@ -1,0 +1,55 @@
+#include <iostream>
+#include <cmath>
+#include <bits/stdc++.h>
+#include <random>
+
+
+
+std::vector<double> generateRandomNormalVariables(int no_of_paths) {
+
+    std::vector<double> randomNumbers(no_of_paths);
+
+    std::random_device rd; // generates random seed
+    std::default_random_engine generator(rd()); // generates random numbers
+    std::normal_distribution<double> normal_dist(0.0,1);
+
+    for (int i=0;i<no_of_paths;i++) {
+        randomNumbers[i] = normal_dist(generator);
+    }
+
+    return randomNumbers;
+
+}
+
+double calculatePayOff(double terminal_price,double strike_price) {
+    double payOff = std::max((terminal_price - strike_price),0.0);
+    return payOff;
+}
+
+double simulatePayOffs(int no_of_paths,double terminal_prices[],double strike_price) {
+    double sum_of_pay_offs = 0.0;
+    for (int i=0;i<no_of_paths;i++) {
+        sum_of_pay_offs+= calculatePayOff(terminal_prices[i],strike_price);
+    }
+
+    return sum_of_pay_offs;
+}
+
+double runSimulation(int no_of_paths,double spotPrice , double strikePrice , double timeToMaturity,double riskFreeRate , double volatility) {
+    double terminal_prices[no_of_paths];
+    std::vector<double> randomNumbers = generateRandomNormalVariables(no_of_paths);
+
+    for (int i = 0;i<no_of_paths;i++) {
+
+        terminal_prices[i] = spotPrice * std::exp((riskFreeRate - (0.5 * std::pow(volatility,2.0)) * timeToMaturity + (volatility*std::sqrt(timeToMaturity)*randomNumbers[i])));
+     }
+
+    double sum = simulatePayOffs(no_of_paths,terminal_prices,strikePrice);
+
+    double estimated_value = std::exp(-riskFreeRate*timeToMaturity) * (1/no_of_paths) * sum;
+
+
+    // need to change to call functions and return the estimated value of option
+    return estimated_value;
+}
+
