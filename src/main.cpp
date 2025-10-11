@@ -1,11 +1,12 @@
 #include <iostream>
-
+#include "monte_carlo_simulation.h"
 int main() {
     double spotPrice;
     double strikePrice;
     double timeToMaturity; // Measured in years
     double riskFreeRate;
     double volatility;
+    int no_of_paths;
 
     std::cout << "Monte Carlo Simulation For Option Pricing!" << std::endl;
 
@@ -19,5 +20,13 @@ int main() {
     std::cin >> riskFreeRate;
     std::cout << "Enter volatility : "<< std::endl;
     std::cin >> volatility;
+    std::cout << "Enter number of simulations : "<< std::endl;
+    std::cin >> no_of_paths;
+
+    double estimated_value = runSimulation(no_of_paths,spotPrice,strikePrice,timeToMaturity,riskFreeRate,volatility);
+
+    // double estimated_value = runSimulation(100000,100.0,100.0,1.0,0.05,0.2);
+    std::cout << "This is the estimated value of the option: " << estimated_value << std::endl;
+
 
 }
