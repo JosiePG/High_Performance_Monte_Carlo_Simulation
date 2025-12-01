@@ -4,7 +4,7 @@
 #include <random>
 #include "monte_carlo_simulation.h"
 
-std::vector<double> generateRandomNormalVariables(int no_of_paths) {
+std::vector<double> MonteCarloEngine::generateRandomNormalVariables(int no_of_paths) {
 
     std::vector<double> randomNumbers(no_of_paths);
 
@@ -21,12 +21,12 @@ std::vector<double> generateRandomNormalVariables(int no_of_paths) {
 
 }
 
-double calculatePayOff(double terminal_price,double strike_price) {
+double MonteCarloEngine::calculatePayOff(double terminal_price,double strike_price) {
     double payOff = std::max((terminal_price - strike_price),0.0);
     return payOff;
 }
 
-double simulatePayOffs(int no_of_paths,double terminal_prices[],double strike_price) {
+double MonteCarloEngine::simulatePayOffs(int no_of_paths,double terminal_prices[],double strike_price) {
     double sum_of_pay_offs = 0.0;
     for (int i=0;i<no_of_paths;i++) {
         sum_of_pay_offs+= calculatePayOff(terminal_prices[i],strike_price);
@@ -35,7 +35,7 @@ double simulatePayOffs(int no_of_paths,double terminal_prices[],double strike_pr
     return sum_of_pay_offs;
 }
 
-double runSimulation(int no_of_paths,double spotPrice , double strikePrice , double timeToMaturity,double riskFreeRate , double volatility) {
+double MonteCarloEngine::runSimulation(int no_of_paths,double spotPrice , double strikePrice , double timeToMaturity,double riskFreeRate , double volatility) {
     double terminal_prices[no_of_paths];
     std::vector<double> randomNumbers = generateRandomNormalVariables(no_of_paths);
 

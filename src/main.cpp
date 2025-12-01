@@ -23,7 +23,9 @@ int main() {
     std::cout << "Enter number of simulations : "<< std::endl;
     std::cin >> no_of_paths;
 
-    double estimated_value = runSimulation(no_of_paths,spotPrice,strikePrice,timeToMaturity,riskFreeRate,volatility);
+    MonteCarloEngine vanilla_model;
+
+    double estimated_value = vanilla_model.runSimulation(no_of_paths,spotPrice,strikePrice,timeToMaturity,riskFreeRate,volatility);
 
     // double estimated_value = runSimulation(100000,100.0,100.0,1.0,0.05,0.2);
     std::cout << "This is the estimated value of the option: " << estimated_value << std::endl;
