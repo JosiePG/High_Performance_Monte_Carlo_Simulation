@@ -13,7 +13,7 @@ protected:
 
     double simulatePayOffs(int no_of_paths,double terminal_prices[],double strike_price);
 public:
-    virtual ~MonteCarloEngine() = default;
+    // virtual ~MonteCarloEngine() = default;
 
     virtual double runSimulation(int no_of_paths,double spotPrice , double strikePrice , double timeToMaturity,double riskFreeRate , double volatility);
 

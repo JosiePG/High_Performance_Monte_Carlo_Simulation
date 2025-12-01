@@ -2,7 +2,7 @@
 #include <cmath>
 #include <bits/stdc++.h>
 #include <random>
-#include "monte_carlo_simulation.h"
+#include "monte_carlo_engine.h"
 
 std::vector<double> MonteCarloEngine::generateRandomNormalVariables(int no_of_paths) {
 
