@@ -14,7 +14,7 @@ main: src/main.cpp monte_carlo_simulation.o
 
 # These are the "intermediate" object files
 # The -c command produces them
-FileSystem.o: src/monte_carlo_simulation.cpp src/monte_carlo_simulation.h
+FileSystem.o: src/monte_carlo_engine.cpp src/monte_carlo_engine.h
 	$(CXX) $(CXXFLAGS) -c src/monte_carlo_simulation.cpp -o monte_carlo_simulation.o
 
 # Some cleanup functions, invoked by typing "make clean" or "make deepclean"

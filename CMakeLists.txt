@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_executable(Final_Year_Project
         src/main.cpp
-        src/monte_carlo_simulation.cpp
-        src/monte_carlo_simulation.h)
+        src/monte_carlo_engine.cpp
+        src/monte_carlo_engine.h)
 
 target_include_directories(Final_Year_Project PRIVATE include)
