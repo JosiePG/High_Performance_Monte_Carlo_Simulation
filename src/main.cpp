@@ -1,6 +1,7 @@
 #include <iostream>
 #include "monte_carlo_engine.h"
 #include "variance_reduction_module.h"
+#include "black_scholes_model.h"
 int main() {
     double spotPrice;
     double strikePrice;
@@ -24,6 +25,9 @@ int main() {
     // std::cout << "Enter number of simulations : "<< std::endl;
     // std::cin >> no_of_paths;
 
+    //BlackScholes bs_model(spotPrice,strikePrice,timeToMaturity,riskFreeRate,volatility);
+
+    BlackScholes bs_model(100.0,100.0,1.0,0.05,0.2);
     MonteCarloEngine vanilla_model;
 
     VarianceReductionModule variance_reduction_model;
@@ -33,6 +37,10 @@ int main() {
 
     double vanilla_estimated_value = vanilla_model.runSimulation(10000,100.0,100.0,1.0,0.05,0.2);
     double variance_reduction_estimated_value = variance_reduction_model.runSimulation(10000,100.0,100.0,1.0,0.05,0.2);
+    double black_scholes_estimated_value = bs_model.callPrice();
+
+
+    std::cout << "This is the black scholes value of the option: " << black_scholes_estimated_value << std::endl;
     std::cout << "This is the vanilla model estimated value of the option: " << vanilla_estimated_value << std::endl;
     std::cout << "This is the variance reduction model estimated value of the option: " << variance_reduction_estimated_value << std::endl;
 

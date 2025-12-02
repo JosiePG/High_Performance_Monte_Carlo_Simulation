@@ -8,6 +8,7 @@ add_executable(Final_Year_Project
         src/monte_carlo_engine.cpp
         src/monte_carlo_engine.h
         src/variance_reduction_module.cpp
-        src/variance_reduction_module.h)
+        src/variance_reduction_module.h
+        src/black_scholes_model.h)
 
 target_include_directories(Final_Year_Project PRIVATE include)
