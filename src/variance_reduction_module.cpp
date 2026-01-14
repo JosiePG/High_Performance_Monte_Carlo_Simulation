@@ -28,7 +28,12 @@ double VarianceReductionModule::runSimulation(int no_of_paths,double spotPrice ,
 
     double sum = 0.5 * (simulatePayOffs(no_of_paths,terminal_prices,strikePrice)+simulatePayOffs(no_of_paths,antithetic_terminal_prices,strikePrice));
 
-    double estimated_value = std::exp(-riskFreeRate*timeToMaturity) * (1.0/no_of_paths) * sum;
+    double antithetic_estimated_value = std::exp(-riskFreeRate*timeToMaturity) * (1.0/no_of_paths) * sum;
+
+    double bs_price = blackScholesPrice(spotPrice,strikePrice,timeToMaturity,riskFreeRate,volatility);
+
+    double estimated_value = antithetic_estimated_value + (bs_price-antithetic_estimated_value);
+
 
 
     // need to change to call functions and return the estimated value of option

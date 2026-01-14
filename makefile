@@ -1,25 +1,36 @@
+# Compiler
+CXX = g++
 
-# Specify the C++ compiler
-CXX     = g++
+# Compiler flags
+CXXFLAGS = -std=c++20 
 
-# optimisation level, outputs debugging info for gdb, and C++ version to use.
-CXXFLAGS = -std=c++20
+# Target executable
+TARGET = main
 
-All: all
-all: main
+# Source files
+SRCS = \
+	src/main.cpp \
+	src/monte_carlo_engine.cpp \
+	src/variance_reduction_module.cpp \
+	src/black_scholes_model.h
 
-# These are the two executables to be produced
-main: src/main.cpp monte_carlo_simulation.o
-	$(CXX) $(CXXFLAGS) src/main.cpp monte_carlo_simulation.o -o main
+# Object files
+OBJS = $(SRCS:.cpp=.o)
 
-# These are the "intermediate" object files
-# The -c command produces them
-FileSystem.o: src/monte_carlo_engine.cpp src/monte_carlo_engine.h
-	$(CXX) $(CXXFLAGS) -c src/monte_carlo_simulation.cpp -o monte_carlo_simulation.o
+# Default target
+all: $(TARGET)
 
-# Some cleanup functions, invoked by typing "make clean" or "make deepclean"
-deepclean:
-	rm -f *~ *.o main main.exe *.stackdump
+# Link step
+$(TARGET): $(OBJS)
+	$(CXX) $(CXXFLAGS) $(OBJS) -o $(TARGET)
 
+# Compile step
+src/%.o: src/%.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+# Cleanup
 clean:
-	rm -f *~ *.o *.stackdump
+	rm -f $(OBJS) $(TARGET) *.stackdump
+
+deepclean: clean
+	rm -f *~
