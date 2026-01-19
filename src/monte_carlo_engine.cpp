@@ -36,6 +36,8 @@ double MonteCarloEngine::simulatePayOffs(int no_of_paths,double terminal_prices[
 }
 
 double MonteCarloEngine::runSimulation(int no_of_paths,double spotPrice , double strikePrice , double timeToMaturity,double riskFreeRate , double volatility) {
+    clock_t start,end;
+    start = clock();
     double terminal_prices[no_of_paths];
     std::vector<double> randomNumbers = generateRandomNormalVariables(no_of_paths);
 
@@ -49,6 +51,14 @@ double MonteCarloEngine::runSimulation(int no_of_paths,double spotPrice , double
     double sum = simulatePayOffs(no_of_paths,terminal_prices,strikePrice);
 
     double estimated_value = std::exp(-riskFreeRate*timeToMaturity) * (1.0/no_of_paths) * sum;
+    end = clock();
+    double time_taken_in_secs = double(end - start) / double(CLOCKS_PER_SEC);
+    double time_taken_cpu_ticks = double(end - start);
+    std::cout << "----------Vanilla monte carlo engine time stats---------- " << std::endl;
+    std::cout << "Time taken by program is : " << time_taken_in_secs << std::setprecision(10);
+    std::cout << " sec " << std::endl;
+    std::cout << "Time taken by program is : " << time_taken_cpu_ticks << std::setprecision(10);
+    std::cout << " cpu clock ticks " << std::endl;
 
 
     // need to change to call functions and return the estimated value of option

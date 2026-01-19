@@ -12,6 +12,8 @@ double VarianceReductionModule::blackScholesPrice(double spotPrice,double strike
 
 
 double VarianceReductionModule::runSimulation(int no_of_paths,double spotPrice , double strikePrice , double timeToMaturity,double riskFreeRate , double volatility){
+    clock_t start,end;
+    start = clock();
     double terminal_prices[no_of_paths];
     double antithetic_terminal_prices[no_of_paths];
     std::vector<double> randomNumbers = generateRandomNormalVariables(no_of_paths);
@@ -33,6 +35,14 @@ double VarianceReductionModule::runSimulation(int no_of_paths,double spotPrice ,
     double bs_price = blackScholesPrice(spotPrice,strikePrice,timeToMaturity,riskFreeRate,volatility);
 
     double estimated_value = antithetic_estimated_value + (bs_price-antithetic_estimated_value);
+    end = clock();
+    double time_taken_in_secs = double(end - start) / double(CLOCKS_PER_SEC);
+    double time_taken_cpu_ticks = double(end - start);
+    std::cout << "----------Variance reduction module time stats---------- " << std::endl;
+    std::cout << "Time taken by program is : " << time_taken_in_secs << std::setprecision(10);
+    std::cout << " sec " << std::endl;
+    std::cout << "Time taken by program is : " << time_taken_cpu_ticks << std::setprecision(10);
+    std::cout << " cpu clock ticks " << std::endl;
 
 
 
