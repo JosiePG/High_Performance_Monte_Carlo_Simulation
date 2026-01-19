@@ -1,0 +1,9 @@
+{
+  "name": "montecarlosimulation",
+  "version": "0.1.0",
+  "dependencies": [
+    "imgui",
+    "glfw3",
+    "glad"
+  ]
+}

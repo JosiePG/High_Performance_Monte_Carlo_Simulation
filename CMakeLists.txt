@@ -14,3 +14,19 @@ add_executable(main
 target_include_directories(main PRIVATE
     src
 )
+# Find packages installed by vcpkg
+find_package(glfw3 CONFIG REQUIRED)
+find_package(glad CONFIG REQUIRED)
+find_package(imgui CONFIG REQUIRED)
+
+# Link libraries to your executable
+target_link_libraries(main PRIVATE
+    glfw
+    glad::glad
+    imgui::imgui
+)
+
+# Link OpenGL on Windows (add this if you're on Windows)
+if (WIN32)
+    target_link_libraries(main PRIVATE opengl32)
+endif()
