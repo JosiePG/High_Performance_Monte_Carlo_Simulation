@@ -11,7 +11,7 @@ protected:
 
     double calculatePayOff(double terminal_price,double strike_price);
 
-    double simulatePayOffs(int no_of_paths,double terminal_prices[],double strike_price);
+    double simulatePayOffs(int no_of_paths,std::vector<double> terminal_prices,double strike_price);
 public:
     // virtual ~MonteCarloEngine() = default;
 

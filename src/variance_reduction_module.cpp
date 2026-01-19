@@ -1,5 +1,7 @@
 #include <cmath>
-#include <bits/stdc++.h>
+#include <iostream>
+#include <iomanip>
+#include <vector>
 
 #include "variance_reduction_module.h"
 #include "black_scholes_model.h"
@@ -14,8 +16,8 @@ double VarianceReductionModule::blackScholesPrice(double spotPrice,double strike
 double VarianceReductionModule::runSimulation(int no_of_paths,double spotPrice , double strikePrice , double timeToMaturity,double riskFreeRate , double volatility){
     clock_t start,end;
     start = clock();
-    double terminal_prices[no_of_paths];
-    double antithetic_terminal_prices[no_of_paths];
+    std::vector<double> terminal_prices(no_of_paths);
+    std::vector<double> antithetic_terminal_prices(no_of_paths);
     std::vector<double> randomNumbers = generateRandomNormalVariables(no_of_paths);
 
     for (int i = 0;i<no_of_paths;i++) {
@@ -39,9 +41,10 @@ double VarianceReductionModule::runSimulation(int no_of_paths,double spotPrice ,
     double time_taken_in_secs = double(end - start) / double(CLOCKS_PER_SEC);
     double time_taken_cpu_ticks = double(end - start);
     std::cout << "----------Variance reduction module time stats---------- " << std::endl;
-    std::cout << "Time taken by program is : " << time_taken_in_secs << std::setprecision(10);
+    std::cout << std::fixed << std::setprecision(5);
+    std::cout << "Time taken by program is : " << time_taken_in_secs ;
     std::cout << " sec " << std::endl;
-    std::cout << "Time taken by program is : " << time_taken_cpu_ticks << std::setprecision(10);
+    std::cout << "Time taken by program is : " << time_taken_cpu_ticks ;
     std::cout << " cpu clock ticks " << std::endl;
 
 

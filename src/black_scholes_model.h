@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <cmath>
+#include <numbers>
 #include <iomanip>
 
 class BlackScholes {
@@ -22,7 +23,7 @@ private:
 
     // Standard normal probability density function
     double normalPDF(double x) const {
-        return (1.0 / sqrt(2.0 * M_PI)) * exp(-0.5 * x * x);
+        return (1.0 / sqrt(2.0 * std::numbers::pi)) * exp(-0.5 * x * x);
     }
 
     // Calculate d1 parameter

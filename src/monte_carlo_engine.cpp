@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cmath>
-#include <bits/stdc++.h>
+#include <iomanip>
+#include <vector>
 #include <random>
 #include "monte_carlo_engine.h"
 
@@ -26,7 +27,7 @@ double MonteCarloEngine::calculatePayOff(double terminal_price,double strike_pri
     return payOff;
 }
 
-double MonteCarloEngine::simulatePayOffs(int no_of_paths,double terminal_prices[],double strike_price) {
+double MonteCarloEngine::simulatePayOffs(int no_of_paths,std::vector<double> terminal_prices,double strike_price) {
     double sum_of_pay_offs = 0.0;
     for (int i=0;i<no_of_paths;i++) {
         sum_of_pay_offs+= calculatePayOff(terminal_prices[i],strike_price);
@@ -38,7 +39,7 @@ double MonteCarloEngine::simulatePayOffs(int no_of_paths,double terminal_prices[
 double MonteCarloEngine::runSimulation(int no_of_paths,double spotPrice , double strikePrice , double timeToMaturity,double riskFreeRate , double volatility) {
     clock_t start,end;
     start = clock();
-    double terminal_prices[no_of_paths];
+    std::vector<double> terminal_prices(no_of_paths);
     std::vector<double> randomNumbers = generateRandomNormalVariables(no_of_paths);
 
     for (int i = 0;i<no_of_paths;i++) {
@@ -55,9 +56,10 @@ double MonteCarloEngine::runSimulation(int no_of_paths,double spotPrice , double
     double time_taken_in_secs = double(end - start) / double(CLOCKS_PER_SEC);
     double time_taken_cpu_ticks = double(end - start);
     std::cout << "----------Vanilla monte carlo engine time stats---------- " << std::endl;
-    std::cout << "Time taken by program is : " << time_taken_in_secs << std::setprecision(10);
+       std::cout << std::fixed << std::setprecision(5);
+    std::cout << "Time taken by program is : " << time_taken_in_secs ;
     std::cout << " sec " << std::endl;
-    std::cout << "Time taken by program is : " << time_taken_cpu_ticks << std::setprecision(10);
+    std::cout << "Time taken by program is : " << time_taken_cpu_ticks ;
     std::cout << " cpu clock ticks " << std::endl;
 
 
