@@ -1,8 +1,4 @@
 #include "imgui_setup.h"
-#include "monte_carlo_engine.h"
-#include "variance_reduction_module.h"
-#include "cache_aware_module.h"
-#include "black_scholes_model.h"
 
 void UseImGui::Init(GLFWwindow* window,const char* glsl_version){
     IMGUI_CHECKVERSION();

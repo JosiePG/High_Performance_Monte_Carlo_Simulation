@@ -1,3 +1,16 @@
+//TODO: 
+// Set up infrastrucre for handling simulation logic with UI need to use seperate threads
+// fix clock outputs and ensure its accurate 
+// - switch to chrono , create a benchmark function , do warm ups and multiple runs calculate mean , min value and std
+// - pin runSimulaiton funciton to a single thread : SetThreadAffinityMask(GetCurrentThread(), 1) ? do later , quite advanced
+// - identify the reasons for varibaility and what we have done to mitigate this 
+// implement cache aware module 
+// design ui layout , what windows do we want ? Plots of convergance lines , accuracy bench marks , profiling results , speed stats?
+// make input paramters int vale make sense for the type of value. 
+
+
+
+
 #include <iostream>
 #include "monte_carlo_engine.h"
 #include "variance_reduction_module.h"
@@ -50,10 +63,6 @@ int main() {
     myimgui.Shutdown();
     glfwDestroyWindow(window);
     glfwTerminate();
-
-
-
-
 
 
     double spotPrice;
