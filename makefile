@@ -13,7 +13,8 @@ SRCS = \
 	src/monte_carlo_engine.cpp \
 	src/variance_reduction_module.cpp \
 	src/cache_aware_module.cpp\
-	src/black_scholes_model.h
+	src/black_scholes_model.h\
+	src/imgui_setup
 
 # Object files
 OBJS = $(SRCS:.cpp=.o)

@@ -1,9 +1,12 @@
 {
   "name": "montecarlosimulation",
   "version": "0.1.0",
-  "dependencies": [
-    "imgui",
-    "glfw3",
-    "glad"
+	"dependencies": [
+		{
+			"name": "imgui",
+			"features": [ "glfw-binding", "opengl3-binding" ]
+		},
+		"glfw3",
+		"glad"
   ]
 }
