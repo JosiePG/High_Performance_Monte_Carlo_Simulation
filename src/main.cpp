@@ -1,11 +1,11 @@
 //TODO: 
 // Set up infrastrucre for handling simulation logic with UI need to use seperate threads
-// fix clock outputs and ensure its accurate 
-// - switch to chrono , create a benchmark function , do warm ups and multiple runs calculate mean , min value and std
+// - plot histogram distribution of microsecond values ? what other graphs can we show? only show if nerd mode is on 
 // - pin runSimulaiton funciton to a single thread : SetThreadAffinityMask(GetCurrentThread(), 1) ? do later , quite advanced
 // - identify the reasons for varibaility and what we have done to mitigate this 
 // implement cache aware module 
 // design ui layout , what windows do we want ? Plots of convergance lines , accuracy bench marks , profiling results , speed stats?
+// plot cache l1 l2 l3 against gflops 
 // make input paramters int vale make sense for the type of value. 
 
 
@@ -19,6 +19,9 @@
 #include "imgui_setup.h"
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
+
+
+
 int main() {
 
     // ui setup
@@ -110,8 +113,11 @@ int main() {
 
     std::cout << "This is the black scholes value of the option: " << black_scholes_estimated_value << std::endl;
     std::cout << "This is the vanilla model estimated value of the option: " << vanilla_estimated_value << std::endl;
+    vanilla_model.benchmark(10000,100.0,100.0,1.0,0.05,0.2);
     std::cout << "This is the variance reduction model estimated value of the option: " << variance_reduction_estimated_value << std::endl;
+    variance_reduction_model.benchmark(10000,100.0,100.0,1.0,0.05,0.2);
     std::cout << "This is the cache aware model estimated value of the option: " << cache_aware_estimated_value << std::endl;
+    cache_aware_model.benchmark(10000,100.0,100.0,1.0,0.05,0.2);
 
 
 }

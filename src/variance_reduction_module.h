@@ -11,6 +11,8 @@ public:
     // ~VarianceReductionModule() = default;
     double runSimulation(int no_of_paths,double spotPrice , double strikePrice , double timeToMaturity,double riskFreeRate , double volatility) override;
 
+    void benchmark(int no_of_paths,double spotPrice , double strikePrice , double timeToMaturity,double riskFreeRate , double volatility) override;
+
 };
 
 
