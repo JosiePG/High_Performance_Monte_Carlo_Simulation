@@ -9,6 +9,7 @@ add_executable(main
     src/monte_carlo_engine.cpp
     src/variance_reduction_module.cpp
     src/cache_aware_module.cpp
+    src/simulation_helper.cpp
     src/imgui_setup.cpp
 )
 
