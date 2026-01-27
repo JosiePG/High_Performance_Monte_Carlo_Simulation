@@ -138,6 +138,7 @@ void SimulationHelper::RunModel(const SimulationParams& params) {
             std::lock_guard<std::mutex> lock(resultsMutex);
             currentResults.estimatedValue = estimatedValue;
             currentResults.bsValue = bsValue;
+            currentResults.error = estimatedValue - bsValue;
             currentResults.timings = times;
             currentResults.iterationsCompleted = i + 1;
             currentResults.modelName = modelName;

@@ -79,7 +79,7 @@ void UseImGui::Update(SimulationHelper & simHelper){
         ImGui::Text("Running...");
     }
     
-    if (cachedIsRunning && ImGui::Button("Stop Simulation")) {
+    if (cachedIsRunning && ImGui::Button("Stop Simulation", ImVec2(200, 40))) {
         simHelper.StopSimulation();
     }
     
@@ -102,33 +102,10 @@ void UseImGui::Update(SimulationHelper & simHelper){
             ImGui::SeparatorText("Results");
             ImGui::Text("Model: %s", resultsCache.modelName.c_str());
             ImGui::Text("Estimated Option Value: %.6f", resultsCache.estimatedValue);
+            ImGui::Text("Error of Estimated Value: %.6f", resultsCache.error);
+
             ImGui::Text("Theoretical Option Value: %.6f", resultsCache.bsValue);
             
-            if (resultsCache.isComplete) {
-                ImGui::SeparatorText("Execution Time Statistics");
-                ImGui::Text("Mean Time: %.2f μs", resultsCache.meanTime);
-                ImGui::Text("Min Time: %.2f μs", static_cast<double>(resultsCache.minTime));
-                ImGui::Text("Total Runs: %llu", resultsCache.iterationsCompleted);
-                
-            
-                static bool showHistogram = false;
-                ImGui::Checkbox("Show Timing Histogram", &showHistogram);
-                
-                if (showHistogram && !resultsCache.timings.empty()) {
-                    std::vector<float> histData;
-                    for (auto t : resultsCache.timings) {
-                        histData.push_back(static_cast<float>(t));
-                    }
-                    
-                    float minVal = *std::min_element(histData.begin(), histData.end());
-                    float maxVal = *std::max_element(histData.begin(), histData.end());
-                    
-                    ImGui::PlotHistogram("Timing Distribution", 
-                        histData.data(), histData.size(), 
-                        0, nullptr, minVal, maxVal, 
-                        ImVec2(0, 150));
-                }
-            }
         } else {
             ImGui::Text("No results yet. Click 'Run Simulation' to start.");
         }

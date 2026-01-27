@@ -32,6 +32,7 @@ struct SimulationParams {
 struct SimulationResults {
     double estimatedValue;
     double bsValue;
+    double error;
     double meanTime;
     double minTime;
     std::vector<int64_t> timings;
