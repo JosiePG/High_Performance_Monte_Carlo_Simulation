@@ -11,7 +11,7 @@ SimulationHelper::~SimulationHelper() {
 }
 
 void SimulationHelper::StartSimulation(const SimulationParams& params) {
-        StopSimulation(); // stops any currently running simulations
+        StopSimulation(); 
     
     {
         std::lock_guard<std::mutex> lock(resultsMutex);

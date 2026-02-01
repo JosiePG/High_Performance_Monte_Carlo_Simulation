@@ -5,23 +5,53 @@
 #include <vector>
 #include <chrono>
 #include <algorithm>
+#include <immintrin.h>
 
 
 
 double CacheAwareModule::runSimulation(int no_of_paths,double spotPrice , double strikePrice , double timeToMaturity,double riskFreeRate , double volatility){
-    std::vector<double> terminal_prices(no_of_paths); // allign this in memory ? 
+    std::vector<double> terminal_prices(no_of_paths); 
     std::vector<double> randomNumbers = generateRandomNormalVariables(no_of_paths);  // could optimize this with memory alllginement ?
 
-    for (int i = 0;i<no_of_paths;i++) { //  vectoriziton ? loop unrolling ?
+    const double drift = (riskFreeRate - 0.5 * volatility * volatility) * timeToMaturity;
+    const double diff  = volatility * std::sqrt(timeToMaturity);
 
-        terminal_prices[i] = spotPrice * std::exp(
-            (riskFreeRate - 0.5 * std::pow(volatility,2.0))
-            * timeToMaturity + volatility*std::sqrt(timeToMaturity)*randomNumbers[i]);
-     }
+    __m256d spot_v  = _mm256_set1_pd(spotPrice);
+    __m256d drift_v = _mm256_set1_pd(drift);
+    __m256d diff_v  = _mm256_set1_pd(diff);
+
+    int i = 0;
+    int vecWidth = 4;
+
+    for (; i + vecWidth <= no_of_paths; i += vecWidth) {
+        __m256d z = _mm256_loadu_pd(&randomNumbers[i]);          
+        __m256d x = _mm256_fmadd_pd(diff_v, z, drift_v);  
+
+        alignas(32) double tmp[4];
+        _mm256_store_pd(tmp, x);                          
+
+        for (int k = 0; k < 4; ++k) {
+            tmp[k] = std::exp(tmp[k]);                    
+        }
+
+        __m256d e = _mm256_load_pd(tmp);
+        __m256d S = _mm256_mul_pd(spot_v, e);             
+        _mm256_storeu_pd(&terminal_prices[i], S);         
+    }
+
+    for (; i < no_of_paths; ++i) {                                  
+        double z = randomNumbers[i];
+        terminal_prices[i] = spotPrice * std::exp(drift + diff * z);
+    }
+
+    // for (int i = 0;i<no_of_paths;i++) { //  vectoriziton ? loop unrolling ?
+    //     double z = randomNumbers[i];
+    //     terminal_prices[i] = spotPrice * std::exp(drift+diff*z);
+    //  }
 
     double sum = simulatePayOffs(no_of_paths,terminal_prices,strikePrice); // optimize this ?
 
-    double estimated_value = std::exp(-riskFreeRate*timeToMaturity) * (1.0/no_of_paths) * sum;
+    double estimated_value = std::exp(-riskFreeRate*timeToMaturity) * ( sum / no_of_paths);
 
 
     // need to change to call functions and return the estimated value of option
@@ -58,18 +88,6 @@ void CacheAwareModule::benchmark(int no_of_paths,double spotPrice , double strik
         int64_t time_in_microseconds = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
         times.push_back(time_in_microseconds);
     }   
-    std::cout << "---------- Cache Aware Module Time stats---------- " << std::endl;
-    std::cout << std::fixed << std::setprecision(6);
-    //TODO : make stats header 
-    std::vector<int64_t>::iterator min_value = std::min_element(times.begin(),times.end());
-    int64_t sum = 0;
-    for(auto time:times){
-        sum += time;
-    }
-    double mean = static_cast<double>(sum) / static_cast<double>(times.size());
-    std::cout << "Mean Time taken by program is : " << mean << " micro seconds " << std::endl;
-    std::cout << "Min Time taken by program is : " << *min_value << " micro seconds " << std::endl;
-    // can add more stats like std etc
 
     
 

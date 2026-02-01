@@ -103,8 +103,12 @@ void UseImGui::Update(SimulationHelper & simHelper){
             ImGui::Text("Model: %s", resultsCache.modelName.c_str());
             ImGui::Text("Estimated Option Value: %.6f", resultsCache.estimatedValue);
             ImGui::Text("Error of Estimated Value: %.6f", resultsCache.error);
-
             ImGui::Text("Theoretical Option Value: %.6f", resultsCache.bsValue);
+            ImGui::SeparatorText("Timings");
+            ImGui::Text("Mean Time in Microseconds:: %.6f", resultsCache.meanTime);
+            ImGui::Text("Min Time in Microseconds:: %.6f", resultsCache.minTime);
+
+
             
         } else {
             ImGui::Text("No results yet. Click 'Run Simulation' to start.");

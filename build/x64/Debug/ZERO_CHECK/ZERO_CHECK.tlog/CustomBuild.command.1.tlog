@@ -1,0 +1,10 @@
+^C:\USERS\DELIA\DESKTOP\UNI\JG535\BUILD\CMAKEFILES\EB68D204DF78EBFD49AC4D5E7355AADF\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Delia/Desktop/Uni/jg535 -BC:/Users/Delia/Desktop/Uni/jg535/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/Delia/Desktop/Uni/jg535/build/monte_carlo.slnx
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
