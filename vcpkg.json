@@ -2,6 +2,7 @@
   "name": "montecarlosimulation",
   "version": "0.1.0",
 	"dependencies": [
+		"implot",
 		{
 			"name": "imgui",
 			"features": [ "glfw-binding", "opengl3-binding" ]

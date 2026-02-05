@@ -36,7 +36,7 @@ struct SimulationResults {
     double meanTime;
     double minTime;
     std::vector<int64_t> timings;
-    uint64_t iterationsCompleted;
+    int iterationsCompleted;
     bool isComplete;
     std::string modelName;
 };

@@ -1,11 +1,22 @@
 #include "imgui_setup.h"
 #include <algorithm>
+#include <filesystem>
+#include <iostream>
+
+
 
 
 void UseImGui::Init(GLFWwindow* window,const char* glsl_version){
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+    ImPlot::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
+    
+    io.Fonts->AddFontFromFileTTF(
+        
+    "fonts/SplineSansMono[wght].ttf",
+    22.0f   // font size
+);
     
  
     ImGui_ImplGlfw_InitForOpenGL(window,true);
@@ -108,6 +119,63 @@ void UseImGui::Update(SimulationHelper & simHelper){
             ImGui::Text("Mean Time in Microseconds:: %.6f", resultsCache.meanTime);
             ImGui::Text("Min Time in Microseconds:: %.6f", resultsCache.minTime);
 
+            //TODO : need to find a way to reset the plot data 
+
+            static bool showPlot = true;
+            ImGui::Checkbox("Show Plot", &showPlot);
+
+            if (showPlot){
+            struct RollingBuffer {
+            float Span;
+            ImVector<ImVec2> Data;
+            RollingBuffer() {
+                Span = 10.0f;
+                Data.reserve(2000);
+            }
+            void AddPoint(float x, float y) {
+                float xmod = fmodf(x, Span);
+                if (!Data.empty() && xmod < Data.back().x)
+                    Data.shrink(0);
+                Data.push_back(ImVec2(xmod, y));
+            }
+        };
+
+            static RollingBuffer   rdata2;
+
+             //rdata2.AddPoint( resultsCache.iterationsCompleted,resultsCache.estimatedValue); doesnt work not continous
+
+        //Add points to the buffers every 0.02 seconds
+        if(cachedIsRunning){
+        static float t = 0, last_t = 0.0f;
+            if (t == 0 || t - last_t >= 0.001f) {
+                rdata2.AddPoint(t,resultsCache.estimatedValue);
+                last_t = t;
+            }
+            t += ImGui::GetIO().DeltaTime;}
+        
+
+            static double tdata1[20], tdata2[20];
+            for (int i = 0; i < 20; ++i)  {
+                tdata1[i] = i;
+                tdata2[i] = resultsCache.bsValue;
+            }
+
+
+            static ImPlotAxisFlags flags = ImPlotAxisFlags_NoTickLabels;
+
+            if (ImPlot::BeginPlot("Theoretical Values vs Estimate Value", ImVec2(-1,400))) {
+                ImPlot::SetupAxes("Time (ms)", "Theoretical Value");
+                ImPlot::SetupAxisLimits(ImAxis_X1,0,3, ImGuiCond_Always);
+                ImPlot::SetupAxisLimits(ImAxis_Y1,resultsCache.bsValue-0.5,resultsCache.bsValue+0.5);
+                ImPlot::PlotLine("Theoretical Value", tdata1,tdata2,20);
+                ImPlot::PlotLine("Estimate Value", &rdata2.Data[0].x, &rdata2.Data[0].y, rdata2.Data.size(), 0, 0, 2 * sizeof(float));
+                ImPlot::EndPlot();
+            }
+        }
+
+
+
+
 
             
         } else {
@@ -132,5 +200,6 @@ void UseImGui::Shutdown(){
     ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
+    ImPlot::DestroyContext();
 
 }

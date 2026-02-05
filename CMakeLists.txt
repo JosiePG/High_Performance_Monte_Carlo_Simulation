@@ -20,11 +20,14 @@ target_include_directories(main PRIVATE
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
+find_package(implot CONFIG REQUIRED)
+
 
 target_link_libraries(main PRIVATE
     glfw
     glad::glad
     imgui::imgui
+    implot::implot
 )
 
 if (WIN32)
