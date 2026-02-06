@@ -18,6 +18,7 @@ class UseImGui{
     private:
         SimulationParams simParams;
         bool showResults = false;
+        bool showPlot = true;
         bool resultsWindowOpen = true; 
         SimulationResults resultsCache;
         double cachedProgress = 0.0;

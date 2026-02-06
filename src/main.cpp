@@ -5,14 +5,11 @@
 // design ui layout , what windows do we want ? Plots of convergance lines , accuracy bench marks , profiling results , speed stats?
 // plot cache l1 l2 l3 against gflops 
 // need to keep track of last model runs like a history tab - do after interview  
-// validate user inputs
 
 
 //TODO : Need to fix issue of model with higher number of paths not awlays being more accurate than model with lower numbe rof paths
-//TODO : make input paramters int value make sense for the input type. 
-//TODO : make number of paths slidable and able to take manuall input
-//TODO : disable certain values that the user can input if black scholes model is picked
-//TODO : disable show plot for models with a low simulation path count
+//TODO : Add Standard Error metric (add show tip to determine how its calculated )
+//TODO : Need to validate user inputs
 
 #include <iostream>
 #include "monte_carlo_engine.h"

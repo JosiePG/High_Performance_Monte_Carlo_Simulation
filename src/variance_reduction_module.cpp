@@ -64,8 +64,7 @@ void VarianceReductionModule::benchmark(int no_of_paths,double spotPrice , doubl
         times.push_back(time_in_microseconds);
     }   
     std::cout << "---------- Variance Reduction Module Time stats---------- " << std::endl;
-    std::cout << std::fixed << std::setprecision(6);
-    //TODO : make stats header 
+    std::cout << std::fixed << std::setprecision(6); 
     std::vector<int64_t>::iterator min_value = std::min_element(times.begin(),times.end());
     int64_t sum = 0;
     for(auto time:times){

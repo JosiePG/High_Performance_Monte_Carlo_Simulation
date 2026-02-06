@@ -140,9 +140,9 @@ void SimulationHelper::RunModel(const SimulationParams& params) {
 
         errors.push_back(fabs(estimatedValue - bsValue));
 
-        if (i>=10){
-                    // updating results every 100 iterations to avoid over locking - need to ensure its still accuarte and a risk we can take
-        if (i % (NUM_RUNS/10) == 0 || i == NUM_RUNS - 1) {
+        if (params.iterations>=100){
+                    // updating results every 10 iterations to avoid over locking - need to ensure its still accuarte and a risk we can take
+        if (i % (NUM_RUNS/100) == 0 || i == NUM_RUNS - 1) {
             auto min_max__estimated_values_pair = std::minmax_element(estimatedValues.begin(), estimatedValues.end()); //could optimize this
             auto min_error = std::min_element(errors.begin(),errors.end());
             std::lock_guard<std::mutex> lock(resultsMutex);
@@ -170,7 +170,7 @@ void SimulationHelper::RunModel(const SimulationParams& params) {
             currentResults.timings = times;
             currentResults.iterationsCompleted = i + 1;
             currentResults.modelName = modelName;
-        }
+       }
         
 
     }
