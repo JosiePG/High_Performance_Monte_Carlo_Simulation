@@ -2,15 +2,17 @@
 // - plot histogram distribution of microsecond values ? what other graphs can we show? only show if nerd mode is on 
 // - pin runSimulaiton funciton to a single thread : SetThreadAffinityMask(GetCurrentThread(), 1) ? do later , quite advanced
 // - identify the reasons for varibaility and what we have done to mitigate this 
-// implement cache aware module 
 // design ui layout , what windows do we want ? Plots of convergance lines , accuracy bench marks , profiling results , speed stats?
 // plot cache l1 l2 l3 against gflops 
-// make input paramters int vale make sense for the type of value. 
+// need to keep track of last model runs like a history tab - do after interview  
 // validate user inputs
-// disable certain values that the user can input if black scholes model is picked 
 
 
-
+//TODO : Need to fix issue of model with higher number of paths not awlays being more accurate than model with lower numbe rof paths
+//TODO : make input paramters int value make sense for the input type. 
+//TODO : make number of paths slidable and able to take manuall input
+//TODO : disable certain values that the user can input if black scholes model is picked
+//TODO : disable show plot for models with a low simulation path count
 
 #include <iostream>
 #include "monte_carlo_engine.h"
@@ -39,7 +41,7 @@ int main() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
 	// Create window with graphics context
-	GLFWwindow *window = glfwCreateWindow(1280, 720, "Monte Carlo Option Pricing Simulation", NULL, NULL);
+	GLFWwindow *window = glfwCreateWindow(1920,1080, "Monte Carlo Option Pricing Simulation", NULL, NULL);
 	if (window == NULL)
 		return 1;
 	glfwMakeContextCurrent(window);

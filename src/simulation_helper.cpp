@@ -2,6 +2,7 @@
 #include <chrono>
 #include <algorithm>
 #include <iostream>
+#include <cmath>
 
 SimulationHelper::SimulationHelper() {
 
@@ -48,6 +49,8 @@ void SimulationHelper::SimulationThread() {
 void SimulationHelper::RunModel(const SimulationParams& params) {
 
     std::vector<int64_t> times;
+    std::vector<double> estimatedValues;
+    std::vector<double> errors;
     double estimatedValue = 0.0;
     std::string modelName;
     
@@ -90,7 +93,7 @@ void SimulationHelper::RunModel(const SimulationParams& params) {
     }
     
     // benchmark runs
-    const int NUM_RUNS = 1000;
+    const int NUM_RUNS = params.iterations;
     for (int i = 0; i < NUM_RUNS; i++) {
         if (shouldStop.load()) {
             return;
@@ -126,23 +129,50 @@ void SimulationHelper::RunModel(const SimulationParams& params) {
         auto end = std::chrono::high_resolution_clock::now();
         int64_t duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
         times.push_back(duration);
+
+        estimatedValues.push_back(estimatedValue);
         
         progress.store(0.1 + (static_cast<double>(i + 1) / NUM_RUNS) * 0.9);
 
         BlackScholes bsValueEngine(params.spotPrice, params.strikePrice, 
         params.timeToMaturity, params.riskFreeRate, params.volatility);
         double bsValue = bsValueEngine.callPrice();
-        
-        // updating results every 100 iterations to avoid over locking - need to ensure its still accuarte and a risk we can take
-        if (i % 100 == 0 || i == NUM_RUNS - 1) {
+
+        errors.push_back(fabs(estimatedValue - bsValue));
+
+        if (i>=10){
+                    // updating results every 100 iterations to avoid over locking - need to ensure its still accuarte and a risk we can take
+        if (i % (NUM_RUNS/10) == 0 || i == NUM_RUNS - 1) {
+            auto min_max__estimated_values_pair = std::minmax_element(estimatedValues.begin(), estimatedValues.end()); //could optimize this
+            auto min_error = std::min_element(errors.begin(),errors.end());
             std::lock_guard<std::mutex> lock(resultsMutex);
             currentResults.estimatedValue = estimatedValue;
+            currentResults.minEstimatedValue = *min_max__estimated_values_pair.first;
+            currentResults.maxEstimatedValue = *min_max__estimated_values_pair.second;
             currentResults.bsValue = bsValue;
-            currentResults.error = estimatedValue - bsValue;
+            currentResults.error = fabs(estimatedValue - bsValue);
+            currentResults.minError = *min_error;
             currentResults.timings = times;
             currentResults.iterationsCompleted = i + 1;
             currentResults.modelName = modelName;
         }
+
+        }else{
+            auto min_max__estimated_values_pair = std::minmax_element(estimatedValues.begin(), estimatedValues.end()); //could optimize this
+            auto min_error = std::min_element(errors.begin(),errors.end());
+            std::lock_guard<std::mutex> lock(resultsMutex);
+            currentResults.estimatedValue = estimatedValue;
+            currentResults.minEstimatedValue = *min_max__estimated_values_pair.first;
+            currentResults.maxEstimatedValue = *min_max__estimated_values_pair.second;
+            currentResults.bsValue = bsValue;
+            currentResults.error = fabs(estimatedValue - bsValue);
+            currentResults.minError = *min_error;
+            currentResults.timings = times;
+            currentResults.iterationsCompleted = i + 1;
+            currentResults.modelName = modelName;
+        }
+        
+
     }
     
     
@@ -154,6 +184,7 @@ void SimulationHelper::RunModel(const SimulationParams& params) {
     int64_t minTime = *std::min_element(times.begin(), times.end());
     
     {
+        // do i need to add min max pair here ?
         std::lock_guard<std::mutex> lock(resultsMutex);
         currentResults.estimatedValue = estimatedValue;
         currentResults.meanTime = meanTime;

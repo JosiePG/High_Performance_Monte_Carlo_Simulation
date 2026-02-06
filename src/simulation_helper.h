@@ -27,12 +27,19 @@ struct SimulationParams {
     double volatility;
     int numPaths;
     ModelType modelType;
+    int iterations;
 };
+
+
+            
 
 struct SimulationResults {
     double estimatedValue;
+    double minEstimatedValue;
+    double maxEstimatedValue;
     double bsValue;
     double error;
+    double minError;
     double meanTime;
     double minTime;
     std::vector<int64_t> timings;

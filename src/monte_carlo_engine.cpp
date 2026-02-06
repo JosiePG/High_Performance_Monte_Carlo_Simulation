@@ -79,7 +79,6 @@ void MonteCarloEngine::benchmark(int no_of_paths,double spotPrice , double strik
     }   
     std::cout << "----------Vanilla Model Time stats---------- " << std::endl;
     std::cout << std::fixed << std::setprecision(6);
-    //TODO : make stats header 
     std::vector<int64_t>::iterator min_value = std::min_element(times.begin(),times.end());
     int64_t sum = 0;
     for(auto time:times){
