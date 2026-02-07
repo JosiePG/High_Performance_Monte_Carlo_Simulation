@@ -6,6 +6,25 @@
 #include <chrono>
 #include <algorithm>
 #include <immintrin.h>
+#include "xoshiro.h"
+
+std::vector<double> CacheAwareModule::generateRandomNormalVariables(int no_of_paths) {
+
+    std::vector<double> randomNumbers(no_of_paths);
+
+    std::random_device rd; 
+    xso::rng generator(rd()); 
+    std::normal_distribution<double> normal_dist(0.0,1);
+
+
+    for (int i=0;i<no_of_paths;i++) {
+        randomNumbers[i] = normal_dist(generator);
+    }
+
+
+    return randomNumbers;
+
+}
 
 std::pair<double,double> CacheAwareModule::runSimulation(int no_of_paths,double spotPrice,double strikePrice,double timeToMaturity,double riskFreeRate,double volatility)
 {
