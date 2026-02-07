@@ -1,8 +1,7 @@
-//TODO: For 1 number of paths the results dont show properly fix this
+
 //TODO: Need to validate user inputs - time cannot be negative etc
 
 //Sunday
-// Port in cache aware model with xoshiro rng
 // preform profiling again and store results 
 // clean up code 
 // comment code

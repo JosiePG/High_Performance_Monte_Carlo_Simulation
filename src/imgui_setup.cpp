@@ -103,7 +103,7 @@ if (ImGui::BeginTable("OptionInputsTable", 2, ImGuiTableFlags_SizingStretchProp)
 
     ImGui::TableSetColumnIndex(1);
     ImGui::SetNextItemWidth(-FLT_MIN);
-    ImGui::SliderInt("##paths", &no_of_paths, 1, 1000000);
+    ImGui::SliderInt("##paths", &no_of_paths, 30, 1000000); // minimum is 30 to meet central limit theorm requirements 
 
     const char* models[] =
     {

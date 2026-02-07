@@ -8,7 +8,7 @@
 #include <immintrin.h>
 #include "xoshiro.h"
 
-std::vector<double> CacheAwareModule::generateRandomNormalVariables(int no_of_paths) {
+std::vector<double> CacheAwareModule::generateRandomNormalVariables(int no_of_paths)  {
 
     std::vector<double> randomNumbers(no_of_paths);
 

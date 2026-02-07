@@ -7,7 +7,7 @@
 
 class MonteCarloEngine {
 protected:
-    std::vector<double> generateRandomNormalVariables(int no_of_paths);
+    virtual std::vector<double> generateRandomNormalVariables(int no_of_paths);
 
     double calculatePayOff(double terminal_price,double strike_price);
 public:
