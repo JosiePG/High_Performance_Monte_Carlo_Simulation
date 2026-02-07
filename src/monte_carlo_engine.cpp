@@ -29,32 +29,33 @@ double MonteCarloEngine::calculatePayOff(double terminal_price,double strike_pri
     return payOff;
 }
 
-double MonteCarloEngine::simulatePayOffs(int no_of_paths,std::vector<double> terminal_prices,double strike_price) {
-    double sum_of_pay_offs = 0.0;
-    for (int i=0;i<no_of_paths;i++) {
-        sum_of_pay_offs+= calculatePayOff(terminal_prices[i],strike_price);
+
+std::pair<double, double> MonteCarloEngine::runSimulation(int no_of_paths, double spotPrice, 
+    double strikePrice, double timeToMaturity, double riskFreeRate, double volatility) {
+    
+    std::vector<double> randomNumbers = generateRandomNormalVariables(no_of_paths);
+    
+    double sum = 0.0;
+    double sum_squared = 0.0;
+    double discount_factor = std::exp(-riskFreeRate * timeToMaturity);
+
+    for (int i = 0; i < no_of_paths; i++) {
+        double terminal_price = spotPrice * std::exp(
+            (riskFreeRate - 0.5 * std::pow(volatility, 2.0)) * timeToMaturity + 
+            volatility * std::sqrt(timeToMaturity) * randomNumbers[i]);
+        
+        double payoff = calculatePayOff(terminal_price, strikePrice);
+        double discounted_payoff = discount_factor * payoff;
+        
+        sum += discounted_payoff;
+        sum_squared += discounted_payoff * discounted_payoff;
     }
 
-    return sum_of_pay_offs;
-}
+    double estimated_value = sum / no_of_paths;
+    double variance = (sum_squared - no_of_paths * (estimated_value * estimated_value)) / (no_of_paths - 1);
+    double standard_error = std::sqrt(variance / no_of_paths);
 
-double MonteCarloEngine::runSimulation(int no_of_paths,double spotPrice , double strikePrice , double timeToMaturity,double riskFreeRate , double volatility) {
-    std::vector<double> terminal_prices(no_of_paths);
-    std::vector<double> randomNumbers = generateRandomNormalVariables(no_of_paths);
-
-    for (int i = 0;i<no_of_paths;i++) {
-
-        terminal_prices[i] = spotPrice * std::exp(
-            (riskFreeRate - 0.5 * std::pow(volatility,2.0))
-            * timeToMaturity + volatility*std::sqrt(timeToMaturity)*randomNumbers[i]);
-     }
-
-    double sum = simulatePayOffs(no_of_paths,terminal_prices,strikePrice);
-
-    double estimated_value = std::exp(-riskFreeRate*timeToMaturity) * (1.0/no_of_paths) * sum;
-
-    // need to change to call functions and return the estimated value of option
-    return estimated_value;
+    return std::make_pair(estimated_value, standard_error);
 }
 
 void MonteCarloEngine::benchmark(int no_of_paths,double spotPrice , double strikePrice , double timeToMaturity,double riskFreeRate , double volatility){

@@ -8,8 +8,9 @@
 
 
 //TODO : Need to fix issue of model with higher number of paths not awlays being more accurate than model with lower numbe rof paths
-//TODO : Add Standard Error metric (add show tip to determine how its calculated )
 //TODO : Need to validate user inputs
+//TODO : need to plot SE vs iterations (100,1000,10000 etc) plot
+//TODO : plot confidence interval
 
 #include <iostream>
 #include "monte_carlo_engine.h"

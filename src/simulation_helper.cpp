@@ -51,6 +51,8 @@ void SimulationHelper::RunModel(const SimulationParams& params) {
     std::vector<int64_t> times;
     std::vector<double> estimatedValues;
     std::vector<double> errors;
+    std::pair<double,double> result;
+    double standardError = 0.0;
     double estimatedValue = 0.0;
     std::string modelName;
     
@@ -103,17 +105,17 @@ void SimulationHelper::RunModel(const SimulationParams& params) {
         
         switch (params.modelType) {
             case ModelType::VANILLA:
-                estimatedValue = vanillaEngine.runSimulation(params.numPaths, 
+                result = vanillaEngine.runSimulation(params.numPaths, 
                     params.spotPrice, params.strikePrice, params.timeToMaturity, 
                     params.riskFreeRate, params.volatility);
                 break;
             case ModelType::VARIANCE_REDUCTION:
-                estimatedValue = varianceEngine.runSimulation(params.numPaths, 
+                result = varianceEngine.runSimulation(params.numPaths, 
                     params.spotPrice, params.strikePrice, params.timeToMaturity, 
                     params.riskFreeRate, params.volatility);
                 break;
             case ModelType::CACHE_AWARE:
-                estimatedValue = cacheEngine.runSimulation(params.numPaths, 
+                result = cacheEngine.runSimulation(params.numPaths, 
                     params.spotPrice, params.strikePrice, params.timeToMaturity, 
                     params.riskFreeRate, params.volatility);
                 break;
@@ -125,6 +127,9 @@ void SimulationHelper::RunModel(const SimulationParams& params) {
                 }
                 break;
         }
+
+        estimatedValue = result.first;
+        standardError = result.second;
         
         auto end = std::chrono::high_resolution_clock::now();
         int64_t duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
@@ -151,7 +156,9 @@ void SimulationHelper::RunModel(const SimulationParams& params) {
             currentResults.maxEstimatedValue = *min_max__estimated_values_pair.second;
             currentResults.bsValue = bsValue;
             currentResults.error = fabs(estimatedValue - bsValue);
-            currentResults.minError = *min_error;
+            currentResults.standardError = standardError;
+            currentResults.ci_hi = estimatedValue + (1.96 * standardError);
+            currentResults.ci_lo = estimatedValue - (1.96 * standardError);
             currentResults.timings = times;
             currentResults.iterationsCompleted = i + 1;
             currentResults.modelName = modelName;
@@ -166,7 +173,7 @@ void SimulationHelper::RunModel(const SimulationParams& params) {
             currentResults.maxEstimatedValue = *min_max__estimated_values_pair.second;
             currentResults.bsValue = bsValue;
             currentResults.error = fabs(estimatedValue - bsValue);
-            currentResults.minError = *min_error;
+            currentResults.standardError = standardError;
             currentResults.timings = times;
             currentResults.iterationsCompleted = i + 1;
             currentResults.modelName = modelName;
@@ -187,6 +194,7 @@ void SimulationHelper::RunModel(const SimulationParams& params) {
         // do i need to add min max pair here ?
         std::lock_guard<std::mutex> lock(resultsMutex);
         currentResults.estimatedValue = estimatedValue;
+        currentResults.standardError = standardError;
         currentResults.meanTime = meanTime;
         currentResults.minTime = minTime;
         currentResults.timings = std::move(times);

@@ -209,7 +209,16 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
             ImGui::Text("Estimated Option Value: %.6f", resultsCache.estimatedValue);
             ImGui::SeparatorText("Model Error");
             ImGui::Text("Absolute Error of Estimated Value: %.6f", resultsCache.error);
-            //ImGui::Text("Absolute Minimum Error of Estimated Value: %.6f", resultsCache.minError);
+            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+            {
+            ImGui::SetTooltip("|Model Estimate Value - Theoretical Value (Black Scholes Model)|");
+            }
+            ImGui::Text("Standard Error of Estimated Value: %.6f", resultsCache.standardError);
+            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+            {
+            ImGui::SetTooltip("Measures statistical uncertainty of the model");
+            }
+            ImGui::Text("95%% confidence interval of estimated value: [%.6f, %.6f]", resultsCache.ci_lo,resultsCache.ci_hi);
             ImGui::SeparatorText("Timings");
             ImGui::Text("Mean Time in Microseconds:: %.6f", resultsCache.meanTime);
             ImGui::Text("Min Time in Microseconds:: %.6f", resultsCache.minTime);
@@ -225,17 +234,6 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
 
 
             if (showPlot){
-                //Add points to the buffers every 0.001 seconds
-                // if(cachedIsRunning){
-                
-                //     if (t == 0 || t - last_t >= 0.001f) {
-                //         rdata2.AddPoint(t,resultsCache.estimatedValue);
-                //         last_t = t;
-                //     }
-                //     t += ImGui::GetIO().DeltaTime;
-                // }
-
-                //could plot error convergance 
 
 
 

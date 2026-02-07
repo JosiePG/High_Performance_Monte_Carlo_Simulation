@@ -8,10 +8,8 @@ class  CacheAwareModule : public MonteCarloEngine {
 private:
     size_t cacheLineSize;
 public:
-    double runSimulation(int no_of_paths,double spotPrice , double strikePrice , double timeToMaturity,double riskFreeRate , double volatility) override;
+    std::pair<double, double> runSimulation(int no_of_paths,double spotPrice , double strikePrice , double timeToMaturity,double riskFreeRate , double volatility) override;
     void benchmark(int no_of_paths,double spotPrice , double strikePrice , double timeToMaturity,double riskFreeRate , double volatility) override;
-    void allocateAllignedMemory(size_t size);
-    double vectorizedPayOff();
 
 };
 

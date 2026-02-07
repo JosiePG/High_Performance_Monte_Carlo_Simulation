@@ -39,7 +39,9 @@ struct SimulationResults {
     double maxEstimatedValue;
     double bsValue;
     double error;
-    double minError;
+    double standardError;
+    double ci_hi;
+    double ci_lo;
     double meanTime;
     double minTime;
     std::vector<int64_t> timings;
@@ -63,6 +65,7 @@ public:
 private:
     void SimulationThread();
     void RunModel(const SimulationParams& params);
+    
     
     std::thread simThread;
     std::atomic<bool> isRunning{false};
