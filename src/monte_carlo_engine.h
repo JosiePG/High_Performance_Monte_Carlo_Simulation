@@ -11,12 +11,8 @@ protected:
 
     double calculatePayOff(double terminal_price,double strike_price);
 public:
-    // virtual ~MonteCarloEngine() = default;
 
     virtual std::pair<double, double> runSimulation(int no_of_paths,double spotPrice , double strikePrice , double timeToMaturity,double riskFreeRate , double volatility);
-
-    virtual void benchmark(int no_of_paths,double spotPrice , double strikePrice , double timeToMaturity,double riskFreeRate , double volatility);
-
 };
 
 

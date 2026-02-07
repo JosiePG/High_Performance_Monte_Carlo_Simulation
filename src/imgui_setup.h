@@ -20,9 +20,12 @@ class UseImGui{
         bool showResults = false;
         bool showPlot = true;
         bool resultsWindowOpen = true; 
+        bool showCResults = false;
+        bool showCPlot = true;
+        bool cResultsWindowOpen = true; 
         SimulationResults resultsCache;
         double cachedProgress = 0.0;
-        bool cachedIsRunning = false; // do we need this?
+        bool cachedIsRunning = false; 
 
 
 };

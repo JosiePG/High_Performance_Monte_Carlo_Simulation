@@ -76,7 +76,6 @@ if (ImGui::BeginTable("OptionInputsTable", 2, ImGuiTableFlags_SizingStretchProp)
     ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_WidthStretch, 0.6f);
     ImGui::TableSetupColumn("Input", ImGuiTableColumnFlags_WidthStretch, 0.6f);
 
-    // Helper lambda to avoid repetition
     auto RowInputDouble = [](const char* label, double* value,
                             double step, double step_fast, const char* fmt)
     {
@@ -157,6 +156,8 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
     if (cachedIsRunning) {
         ImGui::BeginDisabled();
     }
+
+    ImGui::Dummy(ImVec2(0.0f, 10.0f)); // adds spacing
     
     if (ImGui::Button("Benchmark Simulation", ImVec2(250, 40))) {
 
@@ -168,15 +169,17 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
         simParams.numPaths        = no_of_paths;
         simParams.modelType       = static_cast<ModelType>(current_model);
         simParams.iterations      = iterations;
-        simHelper.StartSimulation(simParams);
+        simHelper.StartSimulation(simParams,false);
         showPlot = (iterations >= 50 &&no_of_paths>=10000);
         showResults = true;
         resultsWindowOpen = true;
+        showCResults = false;
+        cResultsWindowOpen = false;
         rdata2.Data.clear();
 
     }
-    
-    if (cachedIsRunning) { // dont really get this
+
+    if (cachedIsRunning) {
         ImGui::EndDisabled();
         ImGui::SameLine();
         ImGui::Text("Running...");
@@ -185,8 +188,37 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
     if (cachedIsRunning && ImGui::Button("Stop Simulation", ImVec2(200, 40))) {
         simHelper.StopSimulation();
     }
-    
+
+    ImGui::Dummy(ImVec2(0.0f, 10.0f)); 
+
+    ImGui::SeparatorText("Standard Error vs Number Of Paths");
+
+    ImGui::Dummy(ImVec2(0.0f, 10.0f));
+
+        if (ImGui::Button("Run Convergance Plot", ImVec2(250, 40))) {
+        simParams.spotPrice       = 100.0;
+        simParams.strikePrice     = 100.0;
+        simParams.timeToMaturity  = 1.0;
+        simParams.riskFreeRate    = 0.03;
+        simParams.volatility      = 0.2;
+        simParams.numPaths        = 0; // dummy number that will be overwritten in SimulationHelper::RunConvergancePlot
+        simParams.modelType       = static_cast<ModelType>(current_model);
+        simParams.iterations      = 1; 
+        simHelper.StartSimulation(simParams,true);
+        showCResults = true;
+        cResultsWindowOpen = true;
+        showResults = false;
+        resultsWindowOpen = false;
+
+    }
+
+    if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+    {
+    ImGui::SetTooltip("Note : default option inputs will be used instead of user input");
+    }
+
     ImGui::End();
+
 
     if (showResults) {
         ImGui::Begin("Simulation Results", &showResults);
@@ -204,9 +236,9 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
         
         if (resultsCache.isComplete || resultsCache.iterationsCompleted > 0) {
             ImGui::SeparatorText("Results");
-            // ImGui::Text("Theoretical Option Value: %.6f", resultsCache.bsValue);
             ImGui::Text("Model: %s", resultsCache.modelName.c_str());
             ImGui::Text("Estimated Option Value: %.6f", resultsCache.estimatedValue);
+            ImGui::Text("Theoretical Option Value: %.6f", resultsCache.bsValue);
             ImGui::SeparatorText("Model Error");
             ImGui::Text("Absolute Error of Estimated Value: %.6f", resultsCache.error);
             if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
@@ -222,7 +254,7 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
             ImGui::SeparatorText("Timings");
             ImGui::Text("Mean Time in Microseconds:: %.6f", resultsCache.meanTime);
             ImGui::Text("Min Time in Microseconds:: %.6f", resultsCache.minTime);
-            ImGui::BeginDisabled(!showPlot);// remove the magic number
+            ImGui::BeginDisabled(!showPlot);
             ImGui::Checkbox("Show Plot", &showPlot);
             ImGui::EndDisabled();
 
@@ -287,6 +319,36 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
         
         ImGui::End();
     }
+
+    if (showCResults)
+{
+    ImGui::Begin("Convergence Results", &showCResults);
+    if (showCPlot){
+    if (ImPlot::BeginPlot("Standard Error Convergence", ImVec2(-1,400)))
+    {
+     ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Log10);
+        ImPlot::SetupAxisScale(ImAxis_Y1, ImPlotScale_Linear);
+        
+
+        ImPlot::SetupAxisLimits(ImAxis_X1, 900, 1010000, ImGuiCond_Always);
+        ImPlot::SetupAxisLimits(ImAxis_Y1, 0.0, 0.5, ImGuiCond_Always);
+        
+        ImPlot::SetupAxes("Number of Paths (log scale)", "Standard Error");
+
+        ImPlot::PlotLine(
+            "SE vs Paths",
+            resultsCache.convergencePaths.data(),
+            resultsCache.convergenceSE.data(),
+            resultsCache.convergencePaths.size()
+        );
+
+        ImPlot::EndPlot();
+    }}
+    ImGui::End();
+}
+
+
+
 
 
 

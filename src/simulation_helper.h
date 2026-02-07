@@ -48,6 +48,8 @@ struct SimulationResults {
     int iterationsCompleted;
     bool isComplete;
     std::string modelName;
+    std::vector<double> convergencePaths;
+    std::vector<double> convergenceSE;
 };
 
 class SimulationHelper {
@@ -55,7 +57,7 @@ public:
     SimulationHelper();
     ~SimulationHelper();
     
-    void StartSimulation(const SimulationParams& params);
+    void StartSimulation(const SimulationParams& params,bool isConvergencePlot);
     void StopSimulation();
     
     bool IsRunning() const { return isRunning.load(); }
@@ -64,7 +66,9 @@ public:
     
 private:
     void SimulationThread();
+    void ConvergencePlotThread();
     void RunModel(const SimulationParams& params);
+    void RunConvergencePlot(const SimulationParams& params);
     
     
     std::thread simThread;

@@ -11,7 +11,7 @@ SimulationHelper::~SimulationHelper() {
     StopSimulation();
 }
 
-void SimulationHelper::StartSimulation(const SimulationParams& params) {
+void SimulationHelper::StartSimulation(const SimulationParams& params,bool isConvergencePlot) {
         StopSimulation(); 
     
     {
@@ -23,8 +23,15 @@ void SimulationHelper::StartSimulation(const SimulationParams& params) {
     shouldStop.store(false);
     isRunning.store(true);
     progress.store(0.0);
+
+    if(isConvergencePlot){
+        simThread = std::thread(&SimulationHelper::ConvergencePlotThread, this);
+    }else{
+        simThread = std::thread(&SimulationHelper::SimulationThread, this); // need to undsertand how this works more
+
+    }
     
-    simThread = std::thread(&SimulationHelper::SimulationThread, this); // need to undsertand how this works more
+    
 }
 
 void SimulationHelper::StopSimulation() {
@@ -46,6 +53,11 @@ void SimulationHelper::SimulationThread() {
     isRunning.store(false);
 }
 
+ void SimulationHelper::ConvergencePlotThread(){
+    RunConvergencePlot(currentParams);
+    isRunning.store(false);
+ }
+
 void SimulationHelper::RunModel(const SimulationParams& params) {
 
     std::vector<int64_t> times;
@@ -55,6 +67,10 @@ void SimulationHelper::RunModel(const SimulationParams& params) {
     double standardError = 0.0;
     double estimatedValue = 0.0;
     std::string modelName;
+    
+    BlackScholes bsValueEngine(params.spotPrice, params.strikePrice, 
+    params.timeToMaturity, params.riskFreeRate, params.volatility);
+    double bsValue = bsValueEngine.callPrice();
     
     // Warmup invocations
     for (int i = 0; i < 100; i++) {
@@ -80,14 +96,6 @@ void SimulationHelper::RunModel(const SimulationParams& params) {
                     params.strikePrice, params.timeToMaturity, 
                     params.riskFreeRate, params.volatility);
                 modelName = "Cache Aware Model";
-                break;
-            case ModelType::BLACK_SCHOLES:
-                {
-                    BlackScholes bs(params.spotPrice, params.strikePrice, 
-                        params.timeToMaturity, params.riskFreeRate, params.volatility);
-                    bs.callPrice();
-                    modelName = "Black-Scholes Model";
-                }
                 break;
         }
         
@@ -119,13 +127,6 @@ void SimulationHelper::RunModel(const SimulationParams& params) {
                     params.spotPrice, params.strikePrice, params.timeToMaturity, 
                     params.riskFreeRate, params.volatility);
                 break;
-            case ModelType::BLACK_SCHOLES:
-                {
-                    BlackScholes bs(params.spotPrice, params.strikePrice, 
-                        params.timeToMaturity, params.riskFreeRate, params.volatility);
-                    estimatedValue = bs.callPrice();
-                }
-                break;
         }
 
         estimatedValue = result.first;
@@ -139,24 +140,21 @@ void SimulationHelper::RunModel(const SimulationParams& params) {
         
         progress.store(0.1 + (static_cast<double>(i + 1) / NUM_RUNS) * 0.9);
 
-        BlackScholes bsValueEngine(params.spotPrice, params.strikePrice, 
-        params.timeToMaturity, params.riskFreeRate, params.volatility);
-        double bsValue = bsValueEngine.callPrice();
 
         errors.push_back(fabs(estimatedValue - bsValue));
 
         if (params.iterations>=100){
-                    // updating results every 10 iterations to avoid over locking - need to ensure its still accuarte and a risk we can take
+        // updating results every 10 iterations to avoid over locking 
         if (i % (NUM_RUNS/100) == 0 || i == NUM_RUNS - 1) {
             auto min_max__estimated_values_pair = std::minmax_element(estimatedValues.begin(), estimatedValues.end()); //could optimize this
             auto min_error = std::min_element(errors.begin(),errors.end());
             std::lock_guard<std::mutex> lock(resultsMutex);
-            currentResults.estimatedValue = estimatedValue;
+            currentResults.estimatedValue = estimatedValue; //TODO :  should this be average??
             currentResults.minEstimatedValue = *min_max__estimated_values_pair.first;
             currentResults.maxEstimatedValue = *min_max__estimated_values_pair.second;
             currentResults.bsValue = bsValue;
             currentResults.error = fabs(estimatedValue - bsValue);
-            currentResults.standardError = standardError;
+            currentResults.standardError = standardError; // should this be average??
             currentResults.ci_hi = estimatedValue + (1.96 * standardError);
             currentResults.ci_lo = estimatedValue - (1.96 * standardError);
             currentResults.timings = times;
@@ -191,7 +189,7 @@ void SimulationHelper::RunModel(const SimulationParams& params) {
     int64_t minTime = *std::min_element(times.begin(), times.end());
     
     {
-        // do i need to add min max pair here ?
+        // does a final update of results to ensure everything is stored 
         std::lock_guard<std::mutex> lock(resultsMutex);
         currentResults.estimatedValue = estimatedValue;
         currentResults.standardError = standardError;
@@ -204,4 +202,65 @@ void SimulationHelper::RunModel(const SimulationParams& params) {
     }
     
     progress.store(1.0);
+}
+
+void SimulationHelper::RunConvergencePlot(const SimulationParams& params) {
+    std::vector<double> errors;
+    std::vector<double> paths;
+    std::pair<double,double> result;
+    double standardError = 0.0;
+    double estimatedValue = 0.0;
+    std::string modelName;
+    std::vector<int> numPaths = {
+    1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000
+};
+
+    BlackScholes bs(params.spotPrice, params.strikePrice,params.timeToMaturity, params.riskFreeRate, params.volatility);
+
+    double bsValue = bs.callPrice();
+
+    for(int path:numPaths){
+        if (shouldStop.load()) {
+            return;
+        }
+        
+        
+        switch (params.modelType) {
+            case ModelType::VANILLA:
+                result = vanillaEngine.runSimulation(path, 
+                    params.spotPrice, params.strikePrice, params.timeToMaturity, 
+                    params.riskFreeRate, params.volatility);
+                break;
+            case ModelType::VARIANCE_REDUCTION:
+                result = varianceEngine.runSimulation(path, 
+                    params.spotPrice, params.strikePrice, params.timeToMaturity, 
+                    params.riskFreeRate, params.volatility);
+                break;
+            case ModelType::CACHE_AWARE:
+                result = cacheEngine.runSimulation(path, 
+                    params.spotPrice, params.strikePrice, params.timeToMaturity, 
+                    params.riskFreeRate, params.volatility);
+                break;
+        }
+
+        estimatedValue = result.first;
+        standardError = result.second;
+        
+
+        paths.push_back(static_cast<double>(path));
+        errors.push_back(standardError);
+
+        progress.store(static_cast<double>(paths.size()) / numPaths.size());
+
+
+        std::lock_guard<std::mutex> lock(resultsMutex);
+        currentResults.convergencePaths = paths;
+        currentResults.convergenceSE = errors;
+        currentResults.isComplete = true;
+        currentResults.modelName = modelName;
+       
+    }
+
+    progress.store(1.0);
+
 }
