@@ -1,5 +1,5 @@
 
-//TODO : preform profiling again and store results 
+//TODO :
 // clean up code 
 // comment code
 // understand code
