@@ -1,6 +1,4 @@
 
-//TODO: Need to validate user inputs - time cannot be negative etc
-
 //Sunday
 // preform profiling again and store results 
 // clean up code 

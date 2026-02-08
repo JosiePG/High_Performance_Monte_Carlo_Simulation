@@ -61,11 +61,11 @@ void UseImGui::Update(SimulationHelper & simHelper){
     ImGui::Text("(CTRL + Click) to enter input manually");
     ImGui::SeparatorText("Option Inputs");
 
-    static double spotPrice = 100.0;
-    static double strikePrice = 100.0;
-    static double timeToMaturity = 1.0;
-    static double riskFreeRate = 0.03;
-    static double volatility = 0.2;
+    static float spotPrice = 100.0;
+    static float strikePrice = 100.0;
+    static float timeToMaturity = 1.0;
+    static float riskFreeRate = 0.03;
+    static float volatility = 0.2;
     static int no_of_paths = 10000;
     static int current_model = 0;
     static int iterations = 1000;
@@ -76,26 +76,31 @@ if (ImGui::BeginTable("OptionInputsTable", 2, ImGuiTableFlags_SizingStretchProp)
     ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_WidthStretch, 0.6f);
     ImGui::TableSetupColumn("Input", ImGuiTableColumnFlags_WidthStretch, 0.6f);
 
-    auto RowInputDouble = [](const char* label, double* value,
-                            double step, double step_fast, const char* fmt)
-    {
-        ImGui::TableNextRow();
+    auto RowDragFloat = [](const char* label, float* value,
+                       float speed,
+                       float minVal,
+                       float maxVal,
+                       const char* fmt)
+{
+    ImGui::TableNextRow();
 
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted(label);
+    ImGui::TableSetColumnIndex(0);
+    ImGui::TextUnformatted(label);
 
-        ImGui::TableSetColumnIndex(1);
-        ImGui::SetNextItemWidth(-FLT_MIN);
+    ImGui::TableSetColumnIndex(1);
+    ImGui::SetNextItemWidth(-FLT_MIN);
 
-        std::string id = std::string("##") + label;
-        ImGui::InputDouble(id.c_str(), value, step, step_fast, fmt);
-    };
+    std::string id = std::string("##") + label;
 
-    RowInputDouble("spot price", &spotPrice, 1.0, 10.0, "%.2f");
-    RowInputDouble("strike price", &strikePrice, 1.0, 10.0, "%.2f");
-    RowInputDouble("time to maturity (years)", &timeToMaturity, 0.05, 0.25, "%.3f");
-    RowInputDouble("risk free rate", &riskFreeRate, 0.01, 0.05, "%.3f");
-    RowInputDouble("volatility", &volatility, 0.01, 0.05, "%.3f");
+    ImGui::DragFloat(id.c_str(),value,speed,minVal,maxVal,fmt,ImGuiSliderFlags_AlwaysClamp); // clamp ensures user cant go below min or max values
+};
+
+    RowDragFloat("spot price", &spotPrice, 1.0f, 0.0f, FLT_MAX, "%.2f");
+    RowDragFloat("strike price", &strikePrice, 1.0f, 0.0f, FLT_MAX, "%.2f");
+    RowDragFloat("time to maturity (years)", &timeToMaturity, 0.05f, 0.0f, FLT_MAX, "%.3f");
+    RowDragFloat("volatility", &volatility, 0.01f, 0.0f, FLT_MAX, "%.3f");
+    RowDragFloat("risk free rate", &riskFreeRate, 0.01f, -1.0f, 1.0f, "%.3f");
+
 
     ImGui::TableNextRow();
     ImGui::TableSetColumnIndex(0);
@@ -103,7 +108,7 @@ if (ImGui::BeginTable("OptionInputsTable", 2, ImGuiTableFlags_SizingStretchProp)
 
     ImGui::TableSetColumnIndex(1);
     ImGui::SetNextItemWidth(-FLT_MIN);
-    ImGui::SliderInt("##paths", &no_of_paths, 30, 1000000); // minimum is 30 to meet central limit theorm requirements 
+    ImGui::SliderInt("##paths", &no_of_paths, 30, 1000000,"%d",ImGuiSliderFlags_AlwaysClamp); // minimum is 30 to meet central limit theorm requirements 
 
     const char* models[] =
     {
@@ -142,7 +147,7 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
     ImGui::Text("iterations");
     ImGui::TableSetColumnIndex(1);
     ImGui::SetNextItemWidth(-FLT_MIN);
-    ImGui::SliderInt("##iterations", &iterations, 1, 1000);
+    ImGui::SliderInt("##iterations", &iterations, 1, 1000,"%d",ImGuiSliderFlags_AlwaysClamp);
     ImGui::EndTable();
 
 }
@@ -254,20 +259,16 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
             ImGui::SeparatorText("Timings");
             ImGui::Text("Mean Time in Microseconds:: %.6f", resultsCache.meanTime);
             ImGui::Text("Min Time in Microseconds:: %.6f", resultsCache.minTime);
-            ImGui::BeginDisabled(!showPlot);
+            ImGui::BeginDisabled((iterations < 50 || no_of_paths<10000));
             ImGui::Checkbox("Show Plot", &showPlot);
             ImGui::EndDisabled();
 
-            if (!showPlot && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+            if ((iterations < 50 || no_of_paths<10000) && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
             {
             ImGui::SetTooltip("Warning : iterations to low (<50) or number of paths to low (<10000), unable to load plot");
             }
-                
-
 
             if (showPlot){
-
-
 
                 static int lastIteration = -1;
 
@@ -278,24 +279,15 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
                         (float)resultsCache.estimatedValue
                     );
 
- 
-
                     lastIteration = resultsCache.iterationsCompleted;
                 }
                 
-
-
-                
-
     
                 double tdata1[20], tdata2[20];
                 for (int i = 0; i < 20; ++i)  {
                     tdata1[i] = (double)i*((double)simParams.iterations/10.0);
                     tdata2[i] = resultsCache.bsValue;
                 }
-
-                
-
 
 
                 if (ImPlot::BeginPlot("Theoretical Values vs Estimate Value", ImVec2(-1,400))) {
@@ -307,9 +299,6 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
                     ImPlot::EndPlot();
                 }
         }
-
-
-
 
 
             
