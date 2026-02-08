@@ -1,8 +1,8 @@
 
-//TODO : Give url for where i got this code from
+// Code from : https://github.com/NiharJani2002/One-Factor-Black-Scholes-in-C-
 
-#ifndef FINAL_YEAR_PROJECT_BLACK_SCHOLES_MODEL_H
-#define FINAL_YEAR_PROJECT_BLACK_SCHOLES_MODEL_H
+#ifndef BLACK_SCHOLES_MODEL_H
+#define BLACK_SCHOLES_MODEL_H
 
 #include <iostream>
 #include <cmath>
@@ -54,4 +54,4 @@ public:
     }
 };
 
-#endif //FINAL_YEAR_PROJECT_BLACK_SCHOLES_MODEL_H
+#endif

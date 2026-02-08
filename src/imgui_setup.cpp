@@ -12,7 +12,6 @@ void UseImGui::Init(GLFWwindow* window,const char* glsl_version){
     ImGuiIO &io = ImGui::GetIO();
     
     io.Fonts->AddFontFromFileTTF(
-        
     "fonts/SplineSansMono[wght].ttf",
     22.0f   
 );
@@ -47,15 +46,15 @@ void UseImGui::Update(SimulationHelper & simHelper){
 
 
     static RollingBuffer   rdata2;
-    static int lastIteration = -1; // why does this have to be static
+    static int lastIteration = -1; 
 
     resultsCache = simHelper.GetResults();
     cachedProgress = simHelper.GetProgress();
     cachedIsRunning = simHelper.IsRunning();
 
     ImGui::SetNextWindowSizeConstraints(
-    ImVec2(250.0f, 250.0f),          // min size
-    ImVec2(800.0f, 600.0f)      // max width = 600 px, unlimited height
+    ImVec2(300.0f, 500.0f),          // min size
+    ImVec2(800.0f, 600.0f)      // max size
 );
     ImGui::Begin("Parameter Settings");
     ImGui::Text("(CTRL + Click) to enter input manually");
@@ -225,6 +224,9 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
     ImGui::End();
 
 
+    ImGui::SetNextWindowSizeConstraints(ImVec2(1000.0f, 800.0f),ImVec2(1200.0f, 900.0f));
+
+
     if (showResults) {
         ImGui::Begin("Simulation Results", &showResults);
         
@@ -309,6 +311,8 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
         ImGui::End();
     }
 
+    ImGui::SetNextWindowSizeConstraints(ImVec2(1000.0f, 400.0f),ImVec2(1200.0f, 600.0f));
+
     if (showCResults)
 {
     ImGui::Begin("Convergence Results", &showCResults);
@@ -335,12 +339,6 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
     }}
     ImGui::End();
 }
-
-
-
-
-
-
 
 
 }

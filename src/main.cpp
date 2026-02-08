@@ -1,6 +1,5 @@
 
-//Sunday
-// preform profiling again and store results 
+//TODO : preform profiling again and store results 
 // clean up code 
 // comment code
 // understand code
@@ -9,7 +8,7 @@
 #include <iostream>
 #include "monte_carlo_engine.h"
 #include "variance_reduction_module.h"
-#include "cache_aware_module.h"
+#include "optimized_mc_engine.h"
 #include "black_scholes_model.h"
 #include "simulation_helper.h"
 #include "imgui_setup.h"
@@ -20,26 +19,20 @@
 
 int main() {
 
-    // ui setup
-
-
-    // Setup window
+    // Ui config
 	if (!glfwInit())
 		return 1;
-
-	// GL 3.0 + GLSL 130
 	const char *glsl_version = "#version 130";
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
-	// Create window with graphics context
 	GLFWwindow *window = glfwCreateWindow(1920,1080, "Monte Carlo Option Pricing Simulation", NULL, NULL);
 	if (window == NULL)
 		return 1;
 	glfwMakeContextCurrent(window);
-	glfwSwapInterval(1); // Enable vsync
+	glfwSwapInterval(1); // Enables vsync
 
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))  // tie window context to glad's opengl funcs
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	throw("Unable to context to OpenGL");
 
 	int screen_width, screen_height;
@@ -49,7 +42,7 @@ int main() {
     UseImGui myimgui;
     myimgui.Init(window,glsl_version);
 
-    SimulationHelper simHelper;
+    SimulationHelper simHelper; // creating the simulation helper object
     
     while(!glfwWindowShouldClose(window)){
         glfwPollEvents();
@@ -65,8 +58,6 @@ int main() {
     myimgui.Shutdown();
     glfwDestroyWindow(window);
     glfwTerminate();
-
-
 
     std::cout << "Monte Carlo Simulation For Option Pricing!" << std::endl;
 

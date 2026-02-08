@@ -1,8 +1,6 @@
 
-
-
-#ifndef FINAL_YEAR_PROJECT_MONTE_CARLO_SIMULATION_H
-#define FINAL_YEAR_PROJECT_MONTE_CARLO_SIMULATION_H
+#ifndef MONTE_CARLO_SIMULATION_H
+#define MONTE_CARLO_SIMULATION_H
 #include <vector>
 
 class MonteCarloEngine {
@@ -16,4 +14,4 @@ public:
 };
 
 
-#endif //FINAL_YEAR_PROJECT_MONTE_CARLO_SIMULATION_H
+#endif 

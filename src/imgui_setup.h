@@ -1,5 +1,5 @@
-#ifndef FINAL_YEAR_PROJECT_IMGUI_SETUP_H
-#define FINAL_YEAR_PROJECT_IMGUI_SETUP_H
+#ifndef IMGUI_SETUP_H
+#define IMGUI_SETUP_H
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>

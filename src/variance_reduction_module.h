@@ -1,7 +1,7 @@
 #include "monte_carlo_engine.h"
 
-#ifndef FINAL_YEAR_PROJECT_VARIANCE_REDUCTION_MODULE_H
-#define FINAL_YEAR_PROJECT_VARIANCE_REDUCTION_MODULE_H
+#ifndef VARIANCE_REDUCTION_MODULE_H
+#define VARIANCE_REDUCTION_MODULE_H
 
 
 class VarianceReductionModule : public MonteCarloEngine {
@@ -14,4 +14,4 @@ public:
 };
 
 
-#endif //FINAL_YEAR_PROJECT_VARIANCE_REDUCTION_MODULE_H
+#endif

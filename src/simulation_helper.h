@@ -9,7 +9,7 @@
 #include <queue>
 #include "monte_carlo_engine.h"
 #include "variance_reduction_module.h"
-#include "cache_aware_module.h"
+#include "optimized_mc_engine.h"
 #include "black_scholes_model.h"
 
 enum class ModelType {
@@ -84,7 +84,7 @@ private:
     
     MonteCarloEngine vanillaEngine;
     VarianceReductionModule varianceEngine;
-    CacheAwareModule cacheEngine;
+    OptimizedMcEngine cacheEngine;
 };
 
 

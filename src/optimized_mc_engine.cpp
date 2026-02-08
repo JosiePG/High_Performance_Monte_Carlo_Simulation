@@ -1,39 +1,36 @@
-#include "cache_aware_module.h"
+#include <algorithm>
+#include "optimized_mc_engine.h"
 #include <cmath>
 #include <iostream>
 #include <iomanip>
-#include <vector>
-#include <chrono>
-#include <algorithm>
 #include <immintrin.h>
+#include <vector>
 #include "xoshiro.h"
 
-std::vector<double> CacheAwareModule::generateRandomNormalVariables(int no_of_paths)  {
+std::vector<double> OptimizedMcEngine::generateRandomNormalVariables(int no_of_paths)  {
 
     std::vector<double> randomNumbers(no_of_paths);
 
-    std::random_device rd; 
-    xso::rng generator(rd()); 
+    std::random_device rd; // seed
+    xso::rng generator(rd()); // xoshiro random number generator
     std::normal_distribution<double> normal_dist(0.0,1);
-
 
     for (int i=0;i<no_of_paths;i++) {
         randomNumbers[i] = normal_dist(generator);
     }
 
-
     return randomNumbers;
 
 }
 
-std::pair<double,double> CacheAwareModule::runSimulation(int no_of_paths,double spotPrice,double strikePrice,double timeToMaturity,double riskFreeRate,double volatility)
+std::pair<double,double> OptimizedMcEngine::runSimulation(int no_of_paths,double spotPrice,double strikePrice,double timeToMaturity,double riskFreeRate,double volatility)
 {
     std::vector<double> randomNumbers =generateRandomNormalVariables(no_of_paths);
     const double drift =(riskFreeRate - 0.5 * volatility * volatility) * timeToMaturity;
     const double diff = volatility * std::sqrt(timeToMaturity);
     const double discount = std::exp(-riskFreeRate * timeToMaturity);
 
-    __m256d spot_v  = _mm256_set1_pd(spotPrice);
+    __m256d spot_v  = _mm256_set1_pd(spotPrice); 
     __m256d drift_v = _mm256_set1_pd(drift);
     __m256d diff_v  = _mm256_set1_pd(diff);
 
@@ -76,12 +73,3 @@ std::pair<double,double> CacheAwareModule::runSimulation(int no_of_paths,double 
 
     return { estimated_value, standardError };
 }
-
-
-
-
-
-    
-
-
-
