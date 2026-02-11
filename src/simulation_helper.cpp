@@ -1,6 +1,7 @@
 #include "simulation_helper.h"
 #include <chrono>
 #include <algorithm>
+#include <numeric>
 #include <iostream>
 #include <cmath>
 
@@ -15,7 +16,7 @@ void SimulationHelper::StartSimulation(const SimulationParams& params,bool isCon
         StopSimulation(); 
     
     {
-        std::lock_guard<std::mutex> lock(resultsMutex);
+        std::lock_guard<std::mutex> lock(resultsMutex); //
         currentParams = params;
         currentResults = SimulationResults();
         currentResults.isComplete = false;
@@ -62,7 +63,6 @@ void SimulationHelper::RunModel(const SimulationParams& params) {
 
     std::vector<int64_t> times;
     std::vector<double> estimatedValues;
-    std::vector<double> errors;
     std::pair<double,double> result;
     double standardError = 0.0;
     double estimatedValue = 0.0;
@@ -138,23 +138,20 @@ void SimulationHelper::RunModel(const SimulationParams& params) {
 
         estimatedValues.push_back(estimatedValue);
         
+        
         progress.store(0.1 + (static_cast<double>(i + 1) / NUM_RUNS) * 0.9);
-
-
-        errors.push_back(fabs(estimatedValue - bsValue));
 
         if (params.iterations>=100){
         // updating results every 10 iterations to avoid over locking 
         if (i % (NUM_RUNS/100) == 0 || i == NUM_RUNS - 1) {
             auto min_max__estimated_values_pair = std::minmax_element(estimatedValues.begin(), estimatedValues.end()); //could optimize this
-            auto min_error = std::min_element(errors.begin(),errors.end());
             std::lock_guard<std::mutex> lock(resultsMutex);
-            currentResults.estimatedValue = estimatedValue; //TODO :  should this be average??
+            currentResults.estimatedValue = estimatedValue;
             currentResults.minEstimatedValue = *min_max__estimated_values_pair.first;
             currentResults.maxEstimatedValue = *min_max__estimated_values_pair.second;
             currentResults.bsValue = bsValue;
             currentResults.error = fabs(estimatedValue - bsValue);
-            currentResults.standardError = standardError; // should this be average??
+            currentResults.standardError = standardError;
             currentResults.ci_hi = estimatedValue + (1.96 * standardError);
             currentResults.ci_lo = estimatedValue - (1.96 * standardError);
             currentResults.timings = times;
@@ -164,7 +161,6 @@ void SimulationHelper::RunModel(const SimulationParams& params) {
 
         }else{
             auto min_max__estimated_values_pair = std::minmax_element(estimatedValues.begin(), estimatedValues.end()); //could optimize this
-            auto min_error = std::min_element(errors.begin(),errors.end());
             std::lock_guard<std::mutex> lock(resultsMutex);
             currentResults.estimatedValue = estimatedValue;
             currentResults.minEstimatedValue = *min_max__estimated_values_pair.first;
@@ -172,6 +168,8 @@ void SimulationHelper::RunModel(const SimulationParams& params) {
             currentResults.bsValue = bsValue;
             currentResults.error = fabs(estimatedValue - bsValue);
             currentResults.standardError = standardError;
+            currentResults.ci_hi = estimatedValue + (1.96 * standardError);
+            currentResults.ci_lo = estimatedValue - (1.96 * standardError);
             currentResults.timings = times;
             currentResults.iterationsCompleted = i + 1;
             currentResults.modelName = modelName;
@@ -190,12 +188,17 @@ void SimulationHelper::RunModel(const SimulationParams& params) {
     
     {
         // does a final update of results to ensure everything is stored 
+        auto min_max__estimated_values_pair = std::minmax_element(estimatedValues.begin(), estimatedValues.end());
         std::lock_guard<std::mutex> lock(resultsMutex);
         currentResults.estimatedValue = estimatedValue;
         currentResults.standardError = standardError;
+        currentResults.minEstimatedValue = *min_max__estimated_values_pair.first;
+        currentResults.maxEstimatedValue = *min_max__estimated_values_pair.second;
+        currentResults.ci_hi = estimatedValue + (1.96 * standardError);
+        currentResults.ci_lo = estimatedValue - (1.96 * standardError);
         currentResults.meanTime = meanTime;
         currentResults.minTime = minTime;
-        currentResults.timings = std::move(times);
+        currentResults.timings = times;
         currentResults.iterationsCompleted = NUM_RUNS;
         currentResults.isComplete = true;
         currentResults.modelName = modelName;

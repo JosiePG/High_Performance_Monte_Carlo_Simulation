@@ -28,6 +28,8 @@ std::pair<double,double> VarianceReductionModule::runSimulation(int no_of_paths,
         double terminal_price = spotPrice * std::exp(
             (riskFreeRate - 0.5 * std::pow(volatility,2.0))
             * timeToMaturity + volatility*std::sqrt(timeToMaturity)*randomNumbers[i]);
+
+            // calculates the antithetic terminal price by utilizing the negative random normal value
         double antithetic_terminal_price = spotPrice * std::exp(
         (riskFreeRate - 0.5 * std::pow(volatility,2.0))
         * timeToMaturity + volatility*std::sqrt(timeToMaturity)*-randomNumbers[i]);

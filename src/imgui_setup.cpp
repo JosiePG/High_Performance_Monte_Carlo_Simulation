@@ -17,7 +17,7 @@ void UseImGui::Init(GLFWwindow* window,const char* glsl_version){
 );
     
  
-    ImGui_ImplGlfw_InitForOpenGL(window,true);
+    ImGui_ImplGlfw_InitForOpenGL(window,true); // creates the main window
     ImGui_ImplOpenGL3_Init(glsl_version);
     ImGui::StyleColorsClassic();
 
@@ -33,6 +33,7 @@ void UseImGui::NewFrame(){
 
 void UseImGui::Update(SimulationHelper & simHelper){
 
+// stores the real time plot data
     struct RollingBuffer {
         ImVector<ImVec2> Data;
         RollingBuffer() {
@@ -43,10 +44,8 @@ void UseImGui::Update(SimulationHelper & simHelper){
         }
     };
 
-
-
     static RollingBuffer   rdata2;
-    static int lastIteration = -1; 
+    static int lastIteration = -1; // must be static to keep track of last iteration between update() function calls
 
     resultsCache = simHelper.GetResults();
     cachedProgress = simHelper.GetProgress();
@@ -56,6 +55,7 @@ void UseImGui::Update(SimulationHelper & simHelper){
     ImVec2(300.0f, 500.0f),          // min size
     ImVec2(800.0f, 600.0f)      // max size
 );
+
     ImGui::Begin("Parameter Settings");
     ImGui::Text("(CTRL + Click) to enter input manually");
     ImGui::SeparatorText("Option Inputs");
@@ -97,7 +97,7 @@ if (ImGui::BeginTable("OptionInputsTable", 2, ImGuiTableFlags_SizingStretchProp)
     RowDragFloat("spot price", &spotPrice, 1.0f, 0.0f, FLT_MAX, "%.2f");
     RowDragFloat("strike price", &strikePrice, 1.0f, 0.0f, FLT_MAX, "%.2f");
     RowDragFloat("time to maturity (years)", &timeToMaturity, 0.05f, 0.0f, FLT_MAX, "%.3f");
-    RowDragFloat("volatility", &volatility, 0.01f, 0.0f, FLT_MAX, "%.3f");
+    RowDragFloat("volatility", &volatility, 0.01f, 0.0f, 3.0f, "%.3f");
     RowDragFloat("risk free rate", &riskFreeRate, 0.01f, -1.0f, 1.0f, "%.3f");
 
 
@@ -283,6 +283,14 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
 
                     lastIteration = resultsCache.iterationsCompleted;
                 }
+
+                float ymin = FLT_MAX;
+                float ymax = -FLT_MAX;
+
+                for (auto& p : rdata2.Data) {
+                    ymin = std::min(ymin, p.y);
+                    ymax = std::max(ymax, p.y);
+                }
                 
     
                 double tdata1[20], tdata2[20];
@@ -295,7 +303,7 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
                 if (ImPlot::BeginPlot("Theoretical Values vs Estimate Value", ImVec2(-1,400))) {
                     ImPlot::SetupAxes("Iterations", "Theoretical Value");
                     ImPlot::SetupAxisLimits(ImAxis_X1,0,simParams.iterations, ImGuiCond_Always);
-                    ImPlot::SetupAxisLimits(ImAxis_Y1,resultsCache.minEstimatedValue,resultsCache.maxEstimatedValue, ImGuiCond_Always);
+                    ImPlot::SetupAxisLimits(ImAxis_Y1,ymin,ymax ,ImGuiCond_Always);
                     ImPlot::PlotLine("Theoretical Value", tdata1,tdata2,20);
                     ImPlot::PlotLine("Estimate Value", &rdata2.Data[0].x, &rdata2.Data[0].y, rdata2.Data.size(), 0, 0, 2 * sizeof(float));
                     ImPlot::EndPlot();

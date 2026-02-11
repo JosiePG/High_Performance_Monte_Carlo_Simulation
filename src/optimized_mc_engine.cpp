@@ -30,9 +30,8 @@ std::pair<double,double> OptimizedMcEngine::runSimulation(int no_of_paths,double
     const double diff = volatility * std::sqrt(timeToMaturity);
     const double discount = std::exp(-riskFreeRate * timeToMaturity);
 
-    __m256d spot_v  = _mm256_set1_pd(spotPrice); 
-    __m256d drift_v = _mm256_set1_pd(drift);
-    __m256d diff_v  = _mm256_set1_pd(diff);
+    __m256d drift_v = _mm256_set1_pd(drift); // stores 4 doubles (drift) into a 256 bit vector
+    __m256d diff_v  = _mm256_set1_pd(diff); // stores 4 doubles (diff) into a 256 bit vector
 
     double sum = 0.0;
     double sum_squared  = 0.0;
@@ -40,13 +39,13 @@ std::pair<double,double> OptimizedMcEngine::runSimulation(int no_of_paths,double
     int i = 0;
     const int vecWidth = 4;
 
-    alignas(32) double tmp[4];
+    alignas(32) double tmp[4]; // aligns the tmp array to 32 bits
 
     for (; i + vecWidth <= no_of_paths; i += vecWidth)
     {
-        __m256d z = _mm256_loadu_pd(&randomNumbers[i]);
-        __m256d x = _mm256_fmadd_pd(diff_v, z, drift_v);
-        _mm256_store_pd(tmp, x);
+        __m256d z = _mm256_loadu_pd(&randomNumbers[i]); // loads 4 random numbers into 256 bit vector 
+        __m256d x = _mm256_fmadd_pd(diff_v, z, drift_v); // multiples diff_v by z and then adds drift_v and stores in x
+        _mm256_store_pd(tmp, x); // stores x into tmp
 
         for (int k = 0; k < 4; ++k)
         {
@@ -58,6 +57,7 @@ std::pair<double,double> OptimizedMcEngine::runSimulation(int no_of_paths,double
         }
     }
 
+    // for loop to handle when i + 4 is > number paths
     for (; i < no_of_paths; ++i)
     {
         double ST = spotPrice * std::exp(drift + diff * randomNumbers[i]);
