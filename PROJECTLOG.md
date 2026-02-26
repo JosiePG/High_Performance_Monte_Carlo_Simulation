@@ -43,9 +43,21 @@ Please regularly update this file to record your project progress. You should be
 - Complemted Variance Reduction Module 
 - Started working on Cache Aware Module
 
-## Week 14 to 16 [12/01 to 23/01]
+## Week 16 to 18 [12/01 to 23/01]
 - Added Imgui library to project
 - Implemented Input Paramters UI
+
+## Week 18 to 20 [25/01 to 06/02]
+- Added Ui Simulation Manager
+- Added Benchmark plots
+
+
+## Week 20 to 22 [08/02 to 20/02]
+- Added Convergance Plot
+- Replaced merseene twister with xoshiro rng
+- Added vectorization
+
+## Week 22 to 24 [22/02 to 06/03]
 
 
 
