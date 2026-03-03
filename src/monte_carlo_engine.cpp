@@ -40,18 +40,19 @@ std::pair<double, double> MonteCarloEngine::runSimulation(int no_of_paths, doubl
     double discount_factor = std::exp(-riskFreeRate * timeToMaturity);
 
     for (int i = 0; i < no_of_paths; i++) {
+        // The geometric brownian motion formula to determine the underlying assets price
         double terminal_price = spotPrice * std::exp(
             (riskFreeRate - 0.5 * std::pow(volatility, 2.0)) * timeToMaturity + 
             volatility * std::sqrt(timeToMaturity) * randomNumbers[i]);
         
         double payoff = calculatePayOff(terminal_price, strikePrice);
-        double discounted_payoff = discount_factor * payoff;
+        double discounted_payoff = discount_factor * payoff; // need to represent the underlying assets price in todays worth
         
         sum += discounted_payoff;
         sum_squared += discounted_payoff * discounted_payoff;
     }
 
-    double estimated_value = sum / no_of_paths;
+    double estimated_value = sum / no_of_paths; // the average of all of the disocunted payoffs
     double variance = (sum_squared - no_of_paths * (estimated_value * estimated_value)) / (no_of_paths - 1);
     double standard_error = std::sqrt(variance / no_of_paths);
 

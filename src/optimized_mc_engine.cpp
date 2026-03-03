@@ -12,7 +12,7 @@ std::vector<double> OptimizedMcEngine::generateRandomNormalVariables(int no_of_p
     std::vector<double> randomNumbers(no_of_paths);
 
     std::random_device rd; // seed
-    xso::rng generator(rd()); // xoshiro random number generator
+    xso::rng generator(rd()); // xoshiro random number generator 
     std::normal_distribution<double> normal_dist(0.0,1);
 
     for (int i=0;i<no_of_paths;i++) {
@@ -29,6 +29,8 @@ std::pair<double,double> OptimizedMcEngine::runSimulation(int no_of_paths,double
     const double drift =(riskFreeRate - 0.5 * volatility * volatility) * timeToMaturity;
     const double diff = volatility * std::sqrt(timeToMaturity);
     const double discount = std::exp(-riskFreeRate * timeToMaturity);
+
+    
 
     __m256d drift_v = _mm256_set1_pd(drift); // stores 4 doubles (drift) into a 256 bit vector
     __m256d diff_v  = _mm256_set1_pd(diff); // stores 4 doubles (diff) into a 256 bit vector

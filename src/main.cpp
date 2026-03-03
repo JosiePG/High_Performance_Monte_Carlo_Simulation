@@ -1,9 +1,10 @@
 
 //TODO :
-// clean up code 
-// comment code
-// understand code
-// prepare slides
+// Compare ram usage between models **
+// look at class design are theyre improvements we can make ? Implement an option class etc
+// create widget to compare models against each other
+// develop feature to store history of model runs
+
 
 #include <iostream>
 #include "monte_carlo_engine.h"
@@ -51,7 +52,6 @@ int main() {
         myimgui.Render();
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
         glfwSwapBuffers(window);
     }
     simHelper.StopSimulation();

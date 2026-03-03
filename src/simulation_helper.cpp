@@ -28,7 +28,7 @@ void SimulationHelper::StartSimulation(const SimulationParams& params,bool isCon
     if(isConvergencePlot){
         simThread = std::thread(&SimulationHelper::ConvergencePlotThread, this);
     }else{
-        simThread = std::thread(&SimulationHelper::SimulationThread, this); // need to undsertand how this works more
+        simThread = std::thread(&SimulationHelper::SimulationThread, this); 
 
     }
     
