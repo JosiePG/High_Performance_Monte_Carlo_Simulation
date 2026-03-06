@@ -1,7 +1,7 @@
 
 //TODO :
-// Compare ram usage between models **
 // look at class design are theyre improvements we can make ? Implement an option class etc
+// plot error from theoretical instead of estimate? error envelopes?
 // create widget to compare models against each other
 // develop feature to store history of model runs
 

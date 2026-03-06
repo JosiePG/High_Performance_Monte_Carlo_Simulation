@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <iostream>
+#include <deque>
 
 
 
@@ -179,6 +180,7 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
         resultsWindowOpen = true;
         showCResults = false;
         cResultsWindowOpen = false;
+        historyAdded = false;
         rdata2.Data.clear();
 
     }
@@ -242,6 +244,7 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
         }
         
         if (resultsCache.isComplete || resultsCache.iterationsCompleted > 0) {
+        
             ImGui::SeparatorText("Results");
             ImGui::Text("Model: %s", resultsCache.modelName.c_str());
             ImGui::Text("Estimated Option Value: %.6f", resultsCache.estimatedValue);
@@ -261,6 +264,18 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
             ImGui::SeparatorText("Timings");
             ImGui::Text("Mean Time in Microseconds:: %.6f", resultsCache.meanTime);
             ImGui::Text("Min Time in Microseconds:: %.6f", resultsCache.minTime);
+            
+            if((resultsCache.iterationsCompleted==simParams.iterations)&& !historyAdded){
+                SimulationData simData;
+                simData.model = resultsCache.modelName;
+                simData.std_error = resultsCache.standardError;
+                simData.mean_time = resultsCache.meanTime;
+                simData.min_time = resultsCache.minTime;
+
+                simHistory.push_front(simData);
+                historyAdded = true;
+            }
+
             ImGui::BeginDisabled((iterations < 50 || no_of_paths<10000));
             ImGui::Checkbox("Show Plot", &showPlot);
             ImGui::EndDisabled();
@@ -315,6 +330,39 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
         } else {
             ImGui::Text("No results yet. Click 'Run Simulation' to start.");
         }
+
+
+
+
+
+        if (ImGui::CollapsingHeader("Simulation History"))
+            {
+                if (ImGui::BeginChild("HistoryChild", ImVec2(0, 200), true))
+                {
+                    if (ImGui::BeginTable("HistoryTable", 4, 
+                        ImGuiTableFlags_Borders | 
+                        ImGuiTableFlags_ScrollY |
+                        ImGuiTableFlags_RowBg))
+                    {
+                        ImGui::TableSetupColumn("Model");
+                        ImGui::TableSetupColumn("Std Error");
+                        ImGui::TableSetupColumn("Mean Time");
+                        ImGui::TableSetupColumn("Min Time");
+                        ImGui::TableHeadersRow();
+
+                        for (auto& entry : simHistory)
+                        {
+                            ImGui::TableNextRow();
+                            ImGui::TableNextColumn(); ImGui::Text("%s",   entry.model.c_str());
+                            ImGui::TableNextColumn(); ImGui::Text("%.4f", entry.std_error);
+                            ImGui::TableNextColumn(); ImGui::Text("%.2f", entry.mean_time);
+                            ImGui::TableNextColumn(); ImGui::Text("%.2f", entry.min_time);
+                        }
+                        ImGui::EndTable();
+                    }
+                }
+                ImGui::EndChild();
+            }
         
         ImGui::End();
     }
