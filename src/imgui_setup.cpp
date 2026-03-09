@@ -45,7 +45,8 @@ void UseImGui::Update(SimulationHelper & simHelper){
         }
     };
 
-    static RollingBuffer   rdata2;
+    static RollingBuffer   rdata;
+    static RollingBuffer   edata;
     static int lastIteration = -1; // must be static to keep track of last iteration between update() function calls
 
     resultsCache = simHelper.GetResults();
@@ -176,8 +177,12 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
         resultsWindowOpen = true;
         showCResults = false;
         cResultsWindowOpen = false;
+        showEstimatePlot = true;
+        showErrorPlot = false;
+
         historyAdded = false;
-        rdata2.Data.clear();
+        rdata.Data.clear();
+        edata.Data.clear();
 
     }
 
@@ -290,10 +295,16 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
 
                 if (resultsCache.iterationsCompleted != lastIteration)
                 {
-                    rdata2.AddPoint(
+                    rdata.AddPoint(
                         (float)resultsCache.iterationsCompleted,
                         (float)resultsCache.estimatedValue
                     );
+
+                    edata.AddPoint(
+                        (float)resultsCache.iterationsCompleted,
+                        (float)resultsCache.error
+                    );
+
 
                     lastIteration = resultsCache.iterationsCompleted;
                 }
@@ -301,9 +312,17 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
                 float ymin = FLT_MAX;
                 float ymax = -FLT_MAX;
 
-                for (auto& p : rdata2.Data) {
+                for (auto& p : rdata.Data) {
                     ymin = std::min(ymin, p.y);
                     ymax = std::max(ymax, p.y);
+                }
+
+                float ymin_e = FLT_MAX;
+                float ymax_e = -FLT_MAX;
+
+                for (auto& p : edata.Data) {
+                    ymin_e = std::min(ymin_e, p.y);
+                    ymax_e = std::max(ymax_e, p.y);
                 }
                 
     
@@ -313,15 +332,37 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
                     tdata2[i] = resultsCache.bsValue;
                 }
 
+                ImGui::SeparatorText("Plot Controls");
 
+                ImGui::Checkbox("Show Estimate vs Theoretical", &showEstimatePlot);
+                ImGui::Checkbox("Show Absolute Error", &showErrorPlot);
+
+
+                ImGui::SeparatorText("Simulation Plots");
+                
+
+
+                if (showEstimatePlot) {
                 if (ImPlot::BeginPlot("Theoretical Values vs Estimate Value", ImVec2(-1,400))) {
                     ImPlot::SetupAxes("Iterations", "Theoretical Value");
                     ImPlot::SetupAxisLimits(ImAxis_X1,0,simParams.iterations, ImGuiCond_Always);
                     ImPlot::SetupAxisLimits(ImAxis_Y1,ymin,ymax ,ImGuiCond_Always);
                     ImPlot::PlotLine("Theoretical Value", tdata1,tdata2,20);
-                    ImPlot::PlotLine("Estimate Value", &rdata2.Data[0].x, &rdata2.Data[0].y, rdata2.Data.size(), 0, 0, 2 * sizeof(float));
+                    ImPlot::SetNextFillStyle(ImVec4(0.2f,0.5f,1.0f,1.0f),0.25f);
+                    ImPlot::PlotLine("Estimate Value", &rdata.Data[0].x, &rdata.Data[0].y, rdata.Data.size(), 0, 0, 2 * sizeof(float));
                     ImPlot::EndPlot();
-                }
+                }}
+
+                ImGui::Dummy(ImVec2(0,10));
+
+                if (showErrorPlot) {
+                if (ImPlot::BeginPlot("Absolute Error of Estimate Value", ImVec2(-1,400))) {
+                    ImPlot::SetupAxes("Iterations", "Absolute Error");
+                    ImPlot::SetupAxisLimits(ImAxis_X1,0,simParams.iterations, ImGuiCond_Always);
+                    ImPlot::SetupAxisLimits(ImAxis_Y1,ymin_e,ymax_e ,ImGuiCond_Always);
+                    ImPlot::PlotLine("Absolute Error", &edata.Data[0].x, &edata.Data[0].y, edata.Data.size(), 0, 0, 2 * sizeof(float));
+                    ImPlot::EndPlot();
+                }}
         }
 
 

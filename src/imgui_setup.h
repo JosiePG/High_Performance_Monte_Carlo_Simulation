@@ -22,6 +22,8 @@ class UseImGui{
         bool resultsWindowOpen = true; 
         bool showCResults = false;
         bool showCPlot = true;
+        bool showEstimatePlot = true;
+        bool showErrorPlot = false;
         bool cResultsWindowOpen = true; 
         SimulationResults resultsCache;
         double cachedProgress = 0.0;
