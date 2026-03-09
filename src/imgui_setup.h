@@ -26,13 +26,7 @@ class UseImGui{
         SimulationResults resultsCache;
         double cachedProgress = 0.0;
         bool cachedIsRunning = false; 
-        struct SimulationData{
-        std::string model;
-        double std_error;
-        double mean_time;
-        double min_time;
-        };
-
+        SimulationData simData;
         std::deque<SimulationData> simHistory;
         bool historyAdded = false;
 

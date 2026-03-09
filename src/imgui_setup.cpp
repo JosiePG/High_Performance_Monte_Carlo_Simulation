@@ -153,11 +153,6 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
 }
 
     
-
-
-
-
-    
     if (cachedIsRunning) {
         ImGui::BeginDisabled();
     }
@@ -174,6 +169,7 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
         simParams.numPaths        = no_of_paths;
         simParams.modelType       = static_cast<ModelType>(current_model);
         simParams.iterations      = iterations;
+
         simHelper.StartSimulation(simParams,false);
         showPlot = (iterations >= 50 &&no_of_paths>=10000);
         showResults = true;
@@ -244,7 +240,6 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
         }
         
         if (resultsCache.isComplete || resultsCache.iterationsCompleted > 0) {
-        
             ImGui::SeparatorText("Results");
             ImGui::Text("Model: %s", resultsCache.modelName.c_str());
             ImGui::Text("Estimated Option Value: %.6f", resultsCache.estimatedValue);
@@ -264,9 +259,12 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
             ImGui::SeparatorText("Timings");
             ImGui::Text("Mean Time in Microseconds:: %.6f", resultsCache.meanTime);
             ImGui::Text("Min Time in Microseconds:: %.6f", resultsCache.minTime);
-            
-            if((resultsCache.iterationsCompleted==simParams.iterations)&& !historyAdded){
-                SimulationData simData;
+
+            ImGui::BeginDisabled((iterations < 50 || no_of_paths<10000));
+            ImGui::Checkbox("Show Plot", &showPlot);
+            ImGui::EndDisabled();
+
+            if(!simHelper.IsRunning() && !historyAdded){
                 simData.model = resultsCache.modelName;
                 simData.std_error = resultsCache.standardError;
                 simData.mean_time = resultsCache.meanTime;
@@ -275,10 +273,6 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
                 simHistory.push_front(simData);
                 historyAdded = true;
             }
-
-            ImGui::BeginDisabled((iterations < 50 || no_of_paths<10000));
-            ImGui::Checkbox("Show Plot", &showPlot);
-            ImGui::EndDisabled();
 
             if ((iterations < 50 || no_of_paths<10000) && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
             {
@@ -331,11 +325,7 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
             ImGui::Text("No results yet. Click 'Run Simulation' to start.");
         }
 
-
-
-
-
-        if (ImGui::CollapsingHeader("Simulation History"))
+    if (ImGui::CollapsingHeader("Simulation History"))
             {
                 if (ImGui::BeginChild("HistoryChild", ImVec2(0, 200), true))
                 {
@@ -363,9 +353,14 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
                 }
                 ImGui::EndChild();
             }
+
+        ImGui::End(); 
         
-        ImGui::End();
     }
+
+    
+
+            
 
     ImGui::SetNextWindowSizeConstraints(ImVec2(1000.0f, 400.0f),ImVec2(1200.0f, 600.0f));
 

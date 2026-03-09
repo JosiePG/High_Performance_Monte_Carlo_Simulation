@@ -200,8 +200,8 @@ void SimulationHelper::RunModel(const SimulationParams& params) {
         currentResults.minTime = minTime;
         currentResults.timings = times;
         currentResults.iterationsCompleted = NUM_RUNS;
-        currentResults.isComplete = true;
         currentResults.modelName = modelName;
+        currentResults.isComplete = true;
     }
     
     progress.store(1.0);

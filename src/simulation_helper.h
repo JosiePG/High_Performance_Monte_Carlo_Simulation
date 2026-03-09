@@ -30,6 +30,13 @@ struct SimulationParams {
     int iterations;
 };
 
+    struct SimulationData{
+    std::string model;
+    double std_error;
+    double mean_time;
+    double min_time;
+    };
+
 
             
 
