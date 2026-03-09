@@ -29,6 +29,7 @@ class UseImGui{
         SimulationData simData;
         std::deque<SimulationData> simHistory;
         bool historyAdded = false;
+        int simHistoryCapacity = 20;
 
 
 };

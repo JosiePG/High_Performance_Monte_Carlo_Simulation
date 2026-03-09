@@ -270,7 +270,12 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
                 simData.mean_time = resultsCache.meanTime;
                 simData.min_time = resultsCache.minTime;
 
-                simHistory.push_front(simData);
+                if(simHistory.size() <simHistoryCapacity){
+                    simHistory.push_front(simData);
+                }else{
+                    simHistory.pop_back();
+                    simHistory.push_front(simData);
+                }
                 historyAdded = true;
             }
 
@@ -334,10 +339,11 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
                         ImGuiTableFlags_ScrollY |
                         ImGuiTableFlags_RowBg))
                     {
-                        ImGui::TableSetupColumn("Model");
-                        ImGui::TableSetupColumn("Std Error");
-                        ImGui::TableSetupColumn("Mean Time");
-                        ImGui::TableSetupColumn("Min Time");
+
+                        ImGui::TableSetupColumn("Model", ImGuiTableColumnFlags_WidthStretch, 3.0f);
+                        ImGui::TableSetupColumn("Std Error", ImGuiTableColumnFlags_WidthStretch, 1.0f);
+                        ImGui::TableSetupColumn("Mean Time", ImGuiTableColumnFlags_WidthStretch, 1.0f);
+                        ImGui::TableSetupColumn("Min Time", ImGuiTableColumnFlags_WidthStretch, 1.0f);
                         ImGui::TableHeadersRow();
 
                         for (auto& entry : simHistory)
