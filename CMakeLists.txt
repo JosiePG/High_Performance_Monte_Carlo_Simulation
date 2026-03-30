@@ -9,6 +9,7 @@ add_executable(main
     src/monte_carlo_engine.cpp
     src/variance_reduction_module.cpp
     src/optimized_mc_engine.cpp
+    src/parallel_mc_engine.cpp
     src/simulation_helper.cpp
     src/imgui_setup.cpp
 )
@@ -17,9 +18,8 @@ target_include_directories(main PRIVATE
     src
 )
 
-target_compile_options(main PRIVATE /arch:AVX2 )
+target_compile_options(main PRIVATE /arch:AVX2 /openmp )
 
-# /fp:fast 
 
 
 find_package(glfw3 CONFIG REQUIRED)

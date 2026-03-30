@@ -1,6 +1,9 @@
 
 //TODO :
-// look at class design are theyre improvements we can make ? Implement an option class etc
+// implement modular code , maybe option class
+// implement open mp parrelel logic
+// should we change the plots.
+// implement code for call and put options
 
 
 
