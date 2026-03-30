@@ -18,7 +18,7 @@ target_include_directories(main PRIVATE
     src
 )
 
-target_compile_options(main PRIVATE /arch:AVX2 /openmp )
+target_compile_options(main PRIVATE /arch:AVX2 /openmp:llvm )
 
 
 
