@@ -349,7 +349,9 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
                     ImPlot::SetupAxisLimits(ImAxis_Y1,ymin,ymax ,ImGuiCond_Always);
                     ImPlot::PlotLine("Theoretical Value", tdata1,tdata2,20);
                     ImPlot::SetNextFillStyle(ImVec4(0.2f,0.5f,1.0f,1.0f),0.25f);
+                    if (rdata.Data.size() > 0){
                     ImPlot::PlotLine("Estimate Value", &rdata.Data[0].x, &rdata.Data[0].y, rdata.Data.size(), 0, 0, 2 * sizeof(float));
+                    }
                     ImPlot::EndPlot();
                 }}
 
@@ -360,7 +362,9 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
                     ImPlot::SetupAxes("Iterations", "Absolute Error");
                     ImPlot::SetupAxisLimits(ImAxis_X1,0,simParams.iterations, ImGuiCond_Always);
                     ImPlot::SetupAxisLimits(ImAxis_Y1,ymin_e,ymax_e ,ImGuiCond_Always);
+                    if (rdata.Data.size() > 0){
                     ImPlot::PlotLine("Absolute Error", &edata.Data[0].x, &edata.Data[0].y, edata.Data.size(), 0, 0, 2 * sizeof(float));
+                    }
                     ImPlot::EndPlot();
                 }}
         }
