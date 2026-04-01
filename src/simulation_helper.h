@@ -6,10 +6,10 @@
 #include <mutex>
 #include <vector>
 #include <functional>
+#include <string>  
 #include <queue>
+#include "option_parameters.h"
 #include "monte_carlo_engine.h"
-#include "variance_reduction_module.h"
-#include "optimized_mc_engine.h"
 #include "black_scholes_model.h"
 
 enum class ModelType {
@@ -20,11 +20,6 @@ enum class ModelType {
 };
 
 struct SimulationParams {
-    double spotPrice;
-    double strikePrice;
-    double timeToMaturity;
-    double riskFreeRate;
-    double volatility;
     int numPaths;
     ModelType modelType;
     int iterations;
@@ -64,7 +59,7 @@ public:
     SimulationHelper();
     ~SimulationHelper();
     
-    void StartSimulation(const SimulationParams& params,bool isConvergencePlot);
+    void StartSimulation(const OptionParameters& OptParams, SimulationParams& SimParams,bool isConvergencePlot);
     void StopSimulation();
     
     bool IsRunning() const { return isRunning.load(); }
@@ -74,8 +69,8 @@ public:
 private:
     void SimulationThread();
     void ConvergencePlotThread();
-    void RunModel(const SimulationParams& params);
-    void RunConvergencePlot(const SimulationParams& params);
+    void RunModel(const OptionParameters& OptParams, SimulationParams& SimParams);
+    void RunConvergencePlot(const OptionParameters& OptParams, SimulationParams& SimParams);
     
     
     std::thread simThread;
@@ -85,13 +80,21 @@ private:
     
     mutable std::mutex resultsMutex;
     SimulationResults currentResults;
-    SimulationParams currentParams;
+    OptionParameters currentOptParams;
+    SimulationParams currentSimParams;
     
-    
-    
-    MonteCarloEngine vanillaEngine;
-    VarianceReductionModule varianceEngine;
-    OptimizedMcEngine cacheEngine;
+    MonteCarloEngine<StandardMersenneTwisterGenerator,
+                     PlainMonteCarloSampling,
+                     SerialExecutionPolicy> 
+                     vanillaEngine;
+    MonteCarloEngine<StandardMersenneTwisterGenerator,
+                     AntitheticVariateSampling,
+                     SerialExecutionPolicy>
+                     varianceEngine;
+    MonteCarloEngine<XoshiroSingleThreadedGenerator,
+                     PlainMonteCarloSampling,
+                     CacheAwareVectorizedExecutionPolicy>
+                     cacheEngine;
 };
 
 

@@ -17,6 +17,7 @@ class UseImGui{
 
     private:
         SimulationParams simParams;
+        OptionParameters optParams;
         bool showResults = false;
         bool showPlot = true;
         bool resultsWindowOpen = true; 

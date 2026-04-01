@@ -162,16 +162,16 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
     
     if (ImGui::Button("Benchmark Simulation", ImVec2(250, 40))) {
 
-        simParams.spotPrice       = spotPrice;
-        simParams.strikePrice     = strikePrice;
-        simParams.timeToMaturity  = timeToMaturity;
-        simParams.riskFreeRate    = riskFreeRate;
-        simParams.volatility      = volatility;
+        optParams.spotPrice       = spotPrice;
+        optParams.strikePrice     = strikePrice;
+        optParams.timeToMaturity  = timeToMaturity;
+        optParams.riskFreeRate    = riskFreeRate;
+        optParams.volatility      = volatility;
         simParams.numPaths        = no_of_paths;
         simParams.modelType       = static_cast<ModelType>(current_model);
         simParams.iterations      = iterations;
 
-        simHelper.StartSimulation(simParams,false);
+        simHelper.StartSimulation(optParams,simParams,false);
         showPlot = (iterations >= 50 &&no_of_paths>=10000);
         showResults = true;
         resultsWindowOpen = true;
@@ -203,15 +203,15 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
     ImGui::Dummy(ImVec2(0.0f, 10.0f));
 
         if (ImGui::Button("Run Convergance Plot", ImVec2(250, 40))) {
-        simParams.spotPrice       = 100.0;
-        simParams.strikePrice     = 100.0;
-        simParams.timeToMaturity  = 1.0;
-        simParams.riskFreeRate    = 0.03;
-        simParams.volatility      = 0.2;
+        optParams.spotPrice       = 100.0;
+        optParams.strikePrice     = 100.0;
+        optParams.timeToMaturity  = 1.0;
+        optParams.riskFreeRate    = 0.03;
+        optParams.volatility      = 0.2;
         simParams.numPaths        = 0; // dummy number that will be overwritten in SimulationHelper::RunConvergancePlot
         simParams.modelType       = static_cast<ModelType>(current_model);
         simParams.iterations      = 1; 
-        simHelper.StartSimulation(simParams,true);
+        simHelper.StartSimulation(optParams,simParams,true);
         showCResults = true;
         cResultsWindowOpen = true;
         showResults = false;

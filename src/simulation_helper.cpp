@@ -12,12 +12,13 @@ SimulationHelper::~SimulationHelper() {
     StopSimulation();
 }
 
-void SimulationHelper::StartSimulation(const SimulationParams& params,bool isConvergencePlot) {
+void SimulationHelper::StartSimulation(const OptionParameters& OptParams, SimulationParams& SimParams,bool isConvergencePlot) {
         StopSimulation(); 
     
     {
         std::lock_guard<std::mutex> lock(resultsMutex); //
-        currentParams = params;
+        currentOptParams = OptParams;
+        currentSimParams = SimParams;
         currentResults = SimulationResults();
         currentResults.isComplete = false;
     }
@@ -50,16 +51,16 @@ SimulationResults SimulationHelper::GetResults() const {
 }
 
 void SimulationHelper::SimulationThread() {
-    RunModel(currentParams);
+    RunModel(currentOptParams,currentSimParams);
     isRunning.store(false);
 }
 
  void SimulationHelper::ConvergencePlotThread(){
-    RunConvergencePlot(currentParams);
+    RunConvergencePlot(currentOptParams,currentSimParams);
     isRunning.store(false);
  }
 
-void SimulationHelper::RunModel(const SimulationParams& params) {
+void SimulationHelper::RunModel(const OptionParameters& OptParams, SimulationParams& SimParams) {
 
     std::vector<int64_t> times;
     std::vector<double> estimatedValues;
@@ -68,8 +69,8 @@ void SimulationHelper::RunModel(const SimulationParams& params) {
     double estimatedValue = 0.0;
     std::string modelName;
     
-    BlackScholes bsValueEngine(params.spotPrice, params.strikePrice, 
-    params.timeToMaturity, params.riskFreeRate, params.volatility);
+    BlackScholes bsValueEngine(OptParams.spotPrice, OptParams.strikePrice, 
+    OptParams.timeToMaturity, OptParams.riskFreeRate, OptParams.volatility);
     double bsValue = bsValueEngine.callPrice();
     
     // Warmup invocations
@@ -78,23 +79,17 @@ void SimulationHelper::RunModel(const SimulationParams& params) {
             return;
         }
         
-        switch (params.modelType) {
+        switch (SimParams.modelType) {
             case ModelType::VANILLA:
-                vanillaEngine.runSimulation(params.numPaths, params.spotPrice, 
-                    params.strikePrice, params.timeToMaturity, 
-                    params.riskFreeRate, params.volatility);
+                vanillaEngine.price(SimParams.numPaths, OptParams);
                 modelName = "Vanilla Monte Carlo Model";
                 break;
             case ModelType::VARIANCE_REDUCTION:
-                varianceEngine.runSimulation(params.numPaths, params.spotPrice, 
-                    params.strikePrice, params.timeToMaturity, 
-                    params.riskFreeRate, params.volatility);
+                varianceEngine.price(SimParams.numPaths, OptParams);
                 modelName = "Variance Reduction Model";
                 break;
             case ModelType::CACHE_AWARE:
-                cacheEngine.runSimulation(params.numPaths, params.spotPrice, 
-                    params.strikePrice, params.timeToMaturity, 
-                    params.riskFreeRate, params.volatility);
+                cacheEngine.price(SimParams.numPaths, OptParams);
                 modelName = "Cache Aware Model";
                 break;
         }
@@ -103,7 +98,7 @@ void SimulationHelper::RunModel(const SimulationParams& params) {
     }
     
     // benchmark runs
-    const int NUM_RUNS = params.iterations;
+    const int NUM_RUNS = SimParams.iterations;
     for (int i = 0; i < NUM_RUNS; i++) {
         if (shouldStop.load()) {
             return;
@@ -111,21 +106,15 @@ void SimulationHelper::RunModel(const SimulationParams& params) {
         
         auto start = std::chrono::high_resolution_clock::now();
         
-        switch (params.modelType) {
+        switch (SimParams.modelType) {
             case ModelType::VANILLA:
-                result = vanillaEngine.runSimulation(params.numPaths, 
-                    params.spotPrice, params.strikePrice, params.timeToMaturity, 
-                    params.riskFreeRate, params.volatility);
+                result = vanillaEngine.price(SimParams.numPaths, OptParams);
                 break;
             case ModelType::VARIANCE_REDUCTION:
-                result = varianceEngine.runSimulation(params.numPaths, 
-                    params.spotPrice, params.strikePrice, params.timeToMaturity, 
-                    params.riskFreeRate, params.volatility);
+                result = varianceEngine.price(SimParams.numPaths, OptParams);
                 break;
             case ModelType::CACHE_AWARE:
-                result = cacheEngine.runSimulation(params.numPaths, 
-                    params.spotPrice, params.strikePrice, params.timeToMaturity, 
-                    params.riskFreeRate, params.volatility);
+                result = cacheEngine.price(SimParams.numPaths, OptParams);
                 break;
         }
 
@@ -141,7 +130,7 @@ void SimulationHelper::RunModel(const SimulationParams& params) {
         
         progress.store(0.1 + (static_cast<double>(i + 1) / NUM_RUNS) * 0.9);
 
-        if (params.iterations>=100){
+        if (SimParams.iterations>=100){
         // updating results every 10 iterations to avoid over locking 
         if (i % (NUM_RUNS/100) == 0 || i == NUM_RUNS - 1) {
             auto min_max__estimated_values_pair = std::minmax_element(estimatedValues.begin(), estimatedValues.end()); //could optimize this
@@ -207,7 +196,7 @@ void SimulationHelper::RunModel(const SimulationParams& params) {
     progress.store(1.0);
 }
 
-void SimulationHelper::RunConvergencePlot(const SimulationParams& params) {
+void SimulationHelper::RunConvergencePlot(const OptionParameters& OptParams, SimulationParams& SimParams) {
     std::vector<double> errors;
     std::vector<double> paths;
     std::pair<double,double> result;
@@ -218,7 +207,7 @@ void SimulationHelper::RunConvergencePlot(const SimulationParams& params) {
     1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000
 };
 
-    BlackScholes bs(params.spotPrice, params.strikePrice,params.timeToMaturity, params.riskFreeRate, params.volatility);
+    BlackScholes bs(OptParams.spotPrice, OptParams.strikePrice,OptParams.timeToMaturity, OptParams.riskFreeRate, OptParams.volatility);
 
     double bsValue = bs.callPrice();
 
@@ -228,21 +217,15 @@ void SimulationHelper::RunConvergencePlot(const SimulationParams& params) {
         }
         
         
-        switch (params.modelType) {
+        switch (SimParams.modelType) {
             case ModelType::VANILLA:
-                result = vanillaEngine.runSimulation(path, 
-                    params.spotPrice, params.strikePrice, params.timeToMaturity, 
-                    params.riskFreeRate, params.volatility);
+                result = vanillaEngine.price(path, OptParams);
                 break;
             case ModelType::VARIANCE_REDUCTION:
-                result = varianceEngine.runSimulation(path, 
-                    params.spotPrice, params.strikePrice, params.timeToMaturity, 
-                    params.riskFreeRate, params.volatility);
+                result = varianceEngine.price(path, OptParams);
                 break;
             case ModelType::CACHE_AWARE:
-                result = cacheEngine.runSimulation(path, 
-                    params.spotPrice, params.strikePrice, params.timeToMaturity, 
-                    params.riskFreeRate, params.volatility);
+                result = cacheEngine.price(path, OptParams);
                 break;
         }
 
