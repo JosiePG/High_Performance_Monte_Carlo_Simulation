@@ -64,6 +64,8 @@ void SimulationHelper::RunModel(const OptionParameters& OptParams, SimulationPar
 
     std::vector<int64_t> times;
     std::vector<double> estimatedValues;
+    double min_value = std::numeric_limits<double>::max();
+    double max_value = std::numeric_limits<double>::min();
     std::pair<double,double> result;
     double standardError = 0.0;
     double estimatedValue = 0.0;
@@ -74,7 +76,7 @@ void SimulationHelper::RunModel(const OptionParameters& OptParams, SimulationPar
     double bsValue = bsValueEngine.callPrice();
     
     // Warmup invocations
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 5; i++) {
         if (shouldStop.load()) {
             return;
         }
@@ -91,6 +93,14 @@ void SimulationHelper::RunModel(const OptionParameters& OptParams, SimulationPar
             case ModelType::CACHE_AWARE:
                 cacheEngine.price(SimParams.numPaths, OptParams);
                 modelName = "Cache Aware Model";
+                break;
+            case ModelType::PARALLEL:
+                parallelEngine.price(SimParams.numPaths, OptParams);
+                modelName = "Parallel Model";
+                break;
+            case ModelType::ULTIMATE:
+                ultimateEngine.price(SimParams.numPaths, OptParams);
+                modelName = "Ultimate Model";
                 break;
         }
         
@@ -116,6 +126,14 @@ void SimulationHelper::RunModel(const OptionParameters& OptParams, SimulationPar
             case ModelType::CACHE_AWARE:
                 result = cacheEngine.price(SimParams.numPaths, OptParams);
                 break;
+            case ModelType::PARALLEL:
+                result = parallelEngine.price(SimParams.numPaths, OptParams);
+                modelName = "Parallel Model";
+                break;
+            case ModelType::ULTIMATE:
+                result = ultimateEngine.price(SimParams.numPaths, OptParams);
+                modelName = "Ultimate Model";
+                break;
         }
 
         estimatedValue = result.first;
@@ -126,6 +144,9 @@ void SimulationHelper::RunModel(const OptionParameters& OptParams, SimulationPar
         times.push_back(duration);
 
         estimatedValues.push_back(estimatedValue);
+        if (estimatedValue < min_value) min_value = estimatedValue;
+        if (estimatedValue > max_value) max_value = estimatedValue;
+
         
         
         progress.store(0.1 + (static_cast<double>(i + 1) / NUM_RUNS) * 0.9);
@@ -133,27 +154,25 @@ void SimulationHelper::RunModel(const OptionParameters& OptParams, SimulationPar
         if (SimParams.iterations>=100){
         // updating results every 10 iterations to avoid over locking 
         if (i % (NUM_RUNS/100) == 0 || i == NUM_RUNS - 1) {
-            auto min_max__estimated_values_pair = std::minmax_element(estimatedValues.begin(), estimatedValues.end()); //could optimize this
             std::lock_guard<std::mutex> lock(resultsMutex);
             currentResults.estimatedValue = estimatedValue;
-            currentResults.minEstimatedValue = *min_max__estimated_values_pair.first;
-            currentResults.maxEstimatedValue = *min_max__estimated_values_pair.second;
+            currentResults.minEstimatedValue = min_value;
+            currentResults.maxEstimatedValue = max_value;
             currentResults.bsValue = bsValue;
             currentResults.error = fabs(estimatedValue - bsValue);
             currentResults.standardError = standardError;
             currentResults.ci_hi = estimatedValue + (1.96 * standardError);
             currentResults.ci_lo = estimatedValue - (1.96 * standardError);
-            currentResults.timings = times;
+            // currentResults.timings = times;
             currentResults.iterationsCompleted = i + 1;
             currentResults.modelName = modelName;
         }
 
         }else{
-            auto min_max__estimated_values_pair = std::minmax_element(estimatedValues.begin(), estimatedValues.end()); //could optimize this
             std::lock_guard<std::mutex> lock(resultsMutex);
             currentResults.estimatedValue = estimatedValue;
-            currentResults.minEstimatedValue = *min_max__estimated_values_pair.first;
-            currentResults.maxEstimatedValue = *min_max__estimated_values_pair.second;
+            currentResults.minEstimatedValue = min_value;
+            currentResults.maxEstimatedValue = max_value;
             currentResults.bsValue = bsValue;
             currentResults.error = fabs(estimatedValue - bsValue);
             currentResults.standardError = standardError;
@@ -187,7 +206,7 @@ void SimulationHelper::RunModel(const OptionParameters& OptParams, SimulationPar
         currentResults.ci_lo = estimatedValue - (1.96 * standardError);
         currentResults.meanTime = meanTime;
         currentResults.minTime = minTime;
-        currentResults.timings = times;
+        // currentResults.timings = times;
         currentResults.iterationsCompleted = NUM_RUNS;
         currentResults.modelName = modelName;
         currentResults.isComplete = true;
@@ -226,6 +245,14 @@ void SimulationHelper::RunConvergencePlot(const OptionParameters& OptParams, Sim
                 break;
             case ModelType::CACHE_AWARE:
                 result = cacheEngine.price(path, OptParams);
+                break;
+            case ModelType::PARALLEL:
+                result = parallelEngine.price(SimParams.numPaths, OptParams);
+                modelName = "Parallel Model";
+                break;
+            case ModelType::ULTIMATE:
+                result = ultimateEngine.price(SimParams.numPaths, OptParams);
+                modelName = "Ultimate Model";
                 break;
         }
 

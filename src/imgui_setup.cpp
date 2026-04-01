@@ -116,6 +116,8 @@ if (ImGui::BeginTable("OptionInputsTable", 2, ImGuiTableFlags_SizingStretchProp)
         "vanilla mc model",
         "variance reduction mc model",
         "cache aware mc model",
+        "parallel mc model",
+        "ultimate mc model"
     };
 
     ImGui::TableNextRow();
@@ -344,7 +346,7 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
 
                 if (showEstimatePlot) {
                 if (ImPlot::BeginPlot("Theoretical Values vs Estimate Value", ImVec2(-1,400))) {
-                    ImPlot::SetupAxes("Iterations", "Theoretical Value");
+                    ImPlot::SetupAxes("Benchmark Iterations", "Theoretical Value");
                     ImPlot::SetupAxisLimits(ImAxis_X1,0,simParams.iterations, ImGuiCond_Always);
                     ImPlot::SetupAxisLimits(ImAxis_Y1,ymin,ymax ,ImGuiCond_Always);
                     ImPlot::PlotLine("Theoretical Value", tdata1,tdata2,20);
@@ -359,7 +361,7 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
 
                 if (showErrorPlot) {
                 if (ImPlot::BeginPlot("Absolute Error of Estimate Value", ImVec2(-1,400))) {
-                    ImPlot::SetupAxes("Iterations", "Absolute Error");
+                    ImPlot::SetupAxes("Benchmark Iterations", "Absolute Error");
                     ImPlot::SetupAxisLimits(ImAxis_X1,0,simParams.iterations, ImGuiCond_Always);
                     ImPlot::SetupAxisLimits(ImAxis_Y1,ymin_e,ymax_e ,ImGuiCond_Always);
                     if (rdata.Data.size() > 0){

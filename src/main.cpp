@@ -8,6 +8,7 @@
 // store all profilling results in dedicated folders
 // fix build config
 // fix plots being buggy
+// speed up simhelper logic so models run fast in ui
 // determine what compiler to use - if time
 
 

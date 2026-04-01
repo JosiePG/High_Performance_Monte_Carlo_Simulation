@@ -13,10 +13,11 @@
 #include "black_scholes_model.h"
 
 enum class ModelType {
-    VANILLA,
-    VARIANCE_REDUCTION,
-    CACHE_AWARE,
-    BLACK_SCHOLES
+    VANILLA = 0,
+    VARIANCE_REDUCTION = 1,
+    CACHE_AWARE = 2,
+    PARALLEL = 3,
+    ULTIMATE = 4,
 };
 
 struct SimulationParams {
@@ -92,9 +93,17 @@ private:
                      SerialExecutionPolicy>
                      varianceEngine;
     MonteCarloEngine<XoshiroSingleThreadedGenerator,
-                     PlainMonteCarloSampling,
-                     CacheAwareVectorizedExecutionPolicy>
+                 PlainMonteCarloSampling,
+                 CacheAwareVectorizedExecutionPolicy>
                      cacheEngine;
+MonteCarloEngine<XoshiroPerThreadGenerator,
+                 PlainMonteCarloSampling,
+                 OpenMPParallelExecutionPolicy>
+                     parallelEngine;
+     MonteCarloEngine<XoshiroPerThreadGenerator,
+                     AntitheticVariateSampling,
+                     OpenMPWithAVX2ExecutionPolicy>
+                     ultimateEngine;
 };
 
 
