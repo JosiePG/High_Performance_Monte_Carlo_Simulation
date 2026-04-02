@@ -52,6 +52,16 @@ public:
 
         return S * normalCDF(d1) - K * exp(-r * T) * normalCDF(d2);
     }
+
+        // Calculate put option price
+    double putPrice() const {
+        if (T <= 0) return std::max(K - S, 0.0);
+        
+        double d1 = calculateD1();
+        double d2 = calculateD2();
+        
+        return K * exp(-r * T) * normalCDF(-d2) - S * normalCDF(-d1);
+    }
 };
 
 #endif

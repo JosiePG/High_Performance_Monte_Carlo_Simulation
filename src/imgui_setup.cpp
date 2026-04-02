@@ -47,7 +47,6 @@ void UseImGui::Update(SimulationHelper & simHelper){
 
     static RollingBuffer   rdata;
     static RollingBuffer   edata;
-    static int lastIteration = -1; // must be static to keep track of last iteration between update() function calls
 
     resultsCache = simHelper.GetResults();
     cachedProgress = simHelper.GetProgress();
@@ -68,6 +67,7 @@ void UseImGui::Update(SimulationHelper & simHelper){
     static float riskFreeRate = 0.03;
     static float volatility = 0.2;
     static int no_of_paths = 10000;
+    static int optionType = 0;  // 0 = call, 1 = put
     static int current_model = 0;
     static int iterations = 1000;
     
@@ -102,6 +102,18 @@ if (ImGui::BeginTable("OptionInputsTable", 2, ImGuiTableFlags_SizingStretchProp)
     RowDragFloat("volatility", &volatility, 0.01f, 0.0f, 3.0f, "%.3f");
     RowDragFloat("risk free rate", &riskFreeRate, 0.01f, -1.0f, 1.0f, "%.3f");
 
+   
+
+    const char* optionTypes[] = { "Call", "Put" };
+    ImGui::TableNextRow();
+    ImGui::TableSetColumnIndex(0);
+    ImGui::Text("option type");
+    ImGui::TableSetColumnIndex(1);
+    ImGui::SetNextItemWidth(-FLT_MIN);
+    ImGui::Combo("##optiontype", &optionType, optionTypes, IM_ARRAYSIZE(optionTypes));
+
+    
+
 
     ImGui::TableNextRow();
     ImGui::TableSetColumnIndex(0);
@@ -117,7 +129,8 @@ if (ImGui::BeginTable("OptionInputsTable", 2, ImGuiTableFlags_SizingStretchProp)
         "variance reduction mc model",
         "cache aware mc model",
         "parallel mc model",
-        "ultimate mc model"
+        "parallel + cache aware mc model",
+        "parallel + cache aware + variance reudction mc model"
     };
 
     ImGui::TableNextRow();
@@ -169,6 +182,7 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
         optParams.timeToMaturity  = timeToMaturity;
         optParams.riskFreeRate    = riskFreeRate;
         optParams.volatility      = volatility;
+        optParams.optionType      = static_cast<OptionType>(optionType);
         simParams.numPaths        = no_of_paths;
         simParams.modelType       = static_cast<ModelType>(current_model);
         simParams.iterations      = iterations;
@@ -273,6 +287,9 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
 
             if(!simHelper.IsRunning() && !historyAdded){
                 simData.model = resultsCache.modelName;
+                simData.optionType     = (optParams.optionType == OptionType::CALL) ? "Call" : "Put";
+                simData.numPaths       = simParams.numPaths;        
+                simData.iterations     = simParams.iterations;     
                 simData.std_error = resultsCache.standardError;
                 simData.mean_time = resultsCache.meanTime;
                 simData.min_time = resultsCache.minTime;
@@ -293,9 +310,7 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
 
             if (showPlot){
 
-                static int lastIteration = -1;
-
-                if (resultsCache.iterationsCompleted != lastIteration)
+                if (resultsCache.iterationsCompleted != lastIteration&& resultsCache.iterationsCompleted > 0)
                 {
                     rdata.AddPoint(
                         (float)resultsCache.iterationsCompleted,
@@ -381,13 +396,16 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
             {
                 if (ImGui::BeginChild("HistoryChild", ImVec2(0, 200), true))
                 {
-                    if (ImGui::BeginTable("HistoryTable", 4, 
+                    if (ImGui::BeginTable("HistoryTable", 7, 
                         ImGuiTableFlags_Borders | 
                         ImGuiTableFlags_ScrollY |
                         ImGuiTableFlags_RowBg))
                     {
 
                         ImGui::TableSetupColumn("Model", ImGuiTableColumnFlags_WidthStretch, 3.0f);
+                        ImGui::TableSetupColumn("Type",      ImGuiTableColumnFlags_WidthFixed, 50.0f);
+                        ImGui::TableSetupColumn("Paths",     ImGuiTableColumnFlags_WidthFixed, 80.0f);
+                        ImGui::TableSetupColumn("Iters",     ImGuiTableColumnFlags_WidthFixed, 60.0f);
                         ImGui::TableSetupColumn("Std Error", ImGuiTableColumnFlags_WidthStretch, 1.0f);
                         ImGui::TableSetupColumn("Mean Time", ImGuiTableColumnFlags_WidthStretch, 1.0f);
                         ImGui::TableSetupColumn("Min Time", ImGuiTableColumnFlags_WidthStretch, 1.0f);
@@ -397,6 +415,9 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
                         {
                             ImGui::TableNextRow();
                             ImGui::TableNextColumn(); ImGui::Text("%s",   entry.model.c_str());
+                            ImGui::TableNextColumn(); ImGui::Text("%s",   entry.optionType.c_str());
+                            ImGui::TableNextColumn(); ImGui::Text("%d",   entry.numPaths);
+                            ImGui::TableNextColumn(); ImGui::Text("%d",   entry.iterations);
                             ImGui::TableNextColumn(); ImGui::Text("%.4f", entry.std_error);
                             ImGui::TableNextColumn(); ImGui::Text("%.2f", entry.mean_time);
                             ImGui::TableNextColumn(); ImGui::Text("%.2f", entry.min_time);
