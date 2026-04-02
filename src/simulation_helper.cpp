@@ -73,7 +73,9 @@ void SimulationHelper::RunModel(const OptionParameters& OptParams, SimulationPar
     
     BlackScholes bsValueEngine(OptParams.spotPrice, OptParams.strikePrice, 
     OptParams.timeToMaturity, OptParams.riskFreeRate, OptParams.volatility);
-    double bsValue = bsValueEngine.callPrice();
+    double bsValue = (OptParams.optionType == OptionType::CALL)
+                 ? bsValueEngine.callPrice()
+                 : bsValueEngine.putPrice();
     
     // Warmup invocations
     for (int i = 0; i < 5; i++) {
@@ -97,6 +99,10 @@ void SimulationHelper::RunModel(const OptionParameters& OptParams, SimulationPar
             case ModelType::PARALLEL:
                 parallelEngine.price(SimParams.numPaths, OptParams);
                 modelName = "Parallel Model";
+                break;
+            case ModelType::PARALLEL_CACHE:
+                parallelAndCacheEngine.price(SimParams.numPaths, OptParams);
+                modelName = "Parallel + Cache Model";
                 break;
             case ModelType::ULTIMATE:
                 ultimateEngine.price(SimParams.numPaths, OptParams);
@@ -129,6 +135,10 @@ void SimulationHelper::RunModel(const OptionParameters& OptParams, SimulationPar
             case ModelType::PARALLEL:
                 result = parallelEngine.price(SimParams.numPaths, OptParams);
                 modelName = "Parallel Model";
+                break;
+            case ModelType::PARALLEL_CACHE:
+                result = parallelAndCacheEngine.price(SimParams.numPaths, OptParams);
+                modelName = "Parallel + Cache Model";
                 break;
             case ModelType::ULTIMATE:
                 result = ultimateEngine.price(SimParams.numPaths, OptParams);
@@ -163,7 +173,7 @@ void SimulationHelper::RunModel(const OptionParameters& OptParams, SimulationPar
             currentResults.standardError = standardError;
             currentResults.ci_hi = estimatedValue + (1.96 * standardError);
             currentResults.ci_lo = estimatedValue - (1.96 * standardError);
-            // currentResults.timings = times;
+            currentResults.timings = times;
             currentResults.iterationsCompleted = i + 1;
             currentResults.modelName = modelName;
         }
@@ -206,7 +216,7 @@ void SimulationHelper::RunModel(const OptionParameters& OptParams, SimulationPar
         currentResults.ci_lo = estimatedValue - (1.96 * standardError);
         currentResults.meanTime = meanTime;
         currentResults.minTime = minTime;
-        // currentResults.timings = times;
+        currentResults.timings = times;
         currentResults.iterationsCompleted = NUM_RUNS;
         currentResults.modelName = modelName;
         currentResults.isComplete = true;
@@ -228,7 +238,10 @@ void SimulationHelper::RunConvergencePlot(const OptionParameters& OptParams, Sim
 
     BlackScholes bs(OptParams.spotPrice, OptParams.strikePrice,OptParams.timeToMaturity, OptParams.riskFreeRate, OptParams.volatility);
 
-    double bsValue = bs.callPrice();
+    double bsValue = (OptParams.optionType == OptionType::CALL)
+                 ? bs.callPrice()
+                 : bs.putPrice();
+    
 
     for(int path:numPaths){
         if (shouldStop.load()) {
@@ -249,6 +262,10 @@ void SimulationHelper::RunConvergencePlot(const OptionParameters& OptParams, Sim
             case ModelType::PARALLEL:
                 result = parallelEngine.price(SimParams.numPaths, OptParams);
                 modelName = "Parallel Model";
+                break;
+            case ModelType::PARALLEL_CACHE:
+                result = parallelAndCacheEngine.price(SimParams.numPaths, OptParams);
+                modelName = "Parallel + Cache Model";
                 break;
             case ModelType::ULTIMATE:
                 result = ultimateEngine.price(SimParams.numPaths, OptParams);

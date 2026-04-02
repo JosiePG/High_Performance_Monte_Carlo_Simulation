@@ -17,7 +17,8 @@ enum class ModelType {
     VARIANCE_REDUCTION = 1,
     CACHE_AWARE = 2,
     PARALLEL = 3,
-    ULTIMATE = 4,
+    PARALLEL_CACHE = 4,
+    ULTIMATE = 5,
 };
 
 struct SimulationParams {
@@ -28,6 +29,9 @@ struct SimulationParams {
 
     struct SimulationData{
     std::string model;
+    std::string optionType;
+    int         numPaths;       
+    int         iterations;      
     double std_error;
     double mean_time;
     double min_time;
@@ -93,13 +97,17 @@ private:
                      SerialExecutionPolicy>
                      varianceEngine;
     MonteCarloEngine<XoshiroSingleThreadedGenerator,
-                 PlainMonteCarloSampling,
+                 EfficentMonteCarloSampling,
                  CacheAwareVectorizedExecutionPolicy>
                      cacheEngine;
 MonteCarloEngine<XoshiroPerThreadGenerator,
-                 PlainMonteCarloSampling,
+                 EfficentMonteCarloSampling,
                  OpenMPParallelExecutionPolicy>
                      parallelEngine;
+MonteCarloEngine<XoshiroPerThreadGenerator,
+                 EfficentMonteCarloSampling,
+                 OpenMPWithAVX2ExecutionPolicy>
+                     parallelAndCacheEngine;
      MonteCarloEngine<XoshiroPerThreadGenerator,
                      AntitheticVariateSampling,
                      OpenMPWithAVX2ExecutionPolicy>

@@ -16,16 +16,18 @@
 struct StandardMersenneTwisterGenerator {
  
     std::vector<double> generateNormals(int numberOfPaths) {
- 
-        std::random_device randomSeed;
-        std::mt19937_64 engine(randomSeed());
-        std::normal_distribution<double> normalDistribution(0.0, 1.0);
- 
+
         std::vector<double> randomNumbers(numberOfPaths);
-        for (int i = 0; i < numberOfPaths; i++) {
-            randomNumbers[i] = normalDistribution(engine);
+
+        std::random_device rd; // generates random seed
+        std::default_random_engine generator(rd()); // generates random numbers
+        std::normal_distribution<double> normal_dist(0.0,1);
+
+        for (int i=0;i<numberOfPaths;i++) {
+            randomNumbers[i] = normal_dist(generator);
         }
- 
+
+
         return randomNumbers;
     }
 };

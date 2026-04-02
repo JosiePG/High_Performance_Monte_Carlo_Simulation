@@ -6,10 +6,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(main
     src/main.cpp
-    src/monte_carlo_engine.cpp
-    src/variance_reduction_module.cpp
-    src/optimized_mc_engine.cpp
-    src/parallel_mc_engine.cpp
+    # src/monte_carlo_engine.cpp
+    # src/variance_reduction_module.cpp
+    # src/optimized_mc_engine.cpp
+    # src/parallel_mc_engine.cpp
     src/simulation_helper.cpp
     src/imgui_setup.cpp
 )

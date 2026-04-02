@@ -1,15 +1,13 @@
 
 //TODO :
-// implement modular code , maybe option class
-// should we change the plots.
 // in ui add call or put input
-// in ui have build your own model widget 
 // implement code for call and put options
 // store all profilling results in dedicated folders
 // fix build config
-// fix plots being buggy
-// speed up simhelper logic so models run fast in ui
-// determine what compiler to use - if time
+// are there any more improvements we can make to cache aware model?
+// clean up code
+// bonuses
+// determine what compiler to use - if time 
 
 
 // #include <iostream>

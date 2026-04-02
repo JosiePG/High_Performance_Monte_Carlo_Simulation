@@ -40,15 +40,8 @@ public:
 // through every policy call and can inline and optimise them fully.
 // There is zero virtual dispatch or overhead inside the simulation loop.
 //
-// Example instantiations:
-//   MonteCarloEngine<StandardMersenneTwisterGenerator,
-//                    PlainMonteCarloSampling,
-//                    SerialExecutionPolicy>
-//
-//   MonteCarloEngine<XoshiroPerThreadGenerator,
-//                    AntitheticVariateSampling,
-//                    OpenMPParallelExecutionPolicy>
-// =============================================================================
+
+
 template<
     typename RngPolicy,
     typename SamplingPolicy,
@@ -96,20 +89,11 @@ public:
         BlackScholes analyticalModel(params.spotPrice, params.strikePrice,
                                      params.timeToMaturity, params.riskFreeRate,
                                      params.volatility);
-        return analyticalModel.callPrice();
+        return (params.optionType == OptionType::CALL)
+           ? analyticalModel.callPrice()
+           : analyticalModel.putPrice();
     }
 };
-// #include <vector>
-
-// class MonteCarloEngine {
-// protected:
-//     virtual std::vector<double> generateRandomNormalVariables(int no_of_paths);
-
-//     double calculatePayOff(double terminal_price,double strike_price);
-// public:
-
-//     virtual std::pair<double, double> runSimulation(int no_of_paths,double spotPrice , double strikePrice , double timeToMaturity,double riskFreeRate , double volatility);
-// };
 
 
 #endif 

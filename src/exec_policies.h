@@ -62,9 +62,9 @@ struct CacheAwareVectorizedExecutionPolicy {
     template<typename RngPolicy, typename SamplingPolicy>
     void runPaths(int numberOfPaths,
                   const OptionParameters& params,
-                  double precomputedDrift,
-                  double precomputedVolSqrtT,
-                  double discountFactor,
+                  double drift,
+                  double diff,
+                  double discount,
                   RngPolicy& rngPolicy,
                   SamplingPolicy& /*samplingPolicy — AVX2 path is plain only*/,
                   double& totalSum,
@@ -74,32 +74,33 @@ struct CacheAwareVectorizedExecutionPolicy {
  
         // Broadcast the scalar constants into 256-bit AVX2 registers
         // Each register holds 4 copies of the same value
-        __m256d driftRegister       = _mm256_set1_pd(precomputedDrift);
-        __m256d volSqrtTRegister    = _mm256_set1_pd(precomputedVolSqrtT);
+        __m256d drift_v      = _mm256_set1_pd(drift);
+        __m256d diff_v    = _mm256_set1_pd(diff);
  
         // alignas(32): ensures the array starts on a 32-byte boundary
         // This is required for _mm256_store_pd (aligned store instruction)
-        alignas(32) double exponentScratch[4];
+        alignas(32) double tmp[4];
  
         int i = 0;
+        const int vecWidth = 4;
  
         // --- Vectorised loop: processes 4 paths per iteration ----------------
-        for (; i + 4 <= numberOfPaths; i += 4) {
+        for (; i + vecWidth <= numberOfPaths; i += vecWidth) {
  
             // Load 4 random variates from the vector into an AVX2 register
-            __m256d zRegister = _mm256_loadu_pd(&randomNumbers[i]);
+            __m256d z = _mm256_loadu_pd(&randomNumbers[i]);
  
             // FMA: exponent[k] = drift + volSqrtT * z[k]  — 4 at once
-            __m256d exponentRegister = _mm256_fmadd_pd(volSqrtTRegister, zRegister, driftRegister);
+            __m256d x = _mm256_fmadd_pd(diff_v, z , drift_v);
  
             // Write the 4 computed exponents back to the aligned scratch buffer
-            _mm256_store_pd(exponentScratch, exponentRegister);
+            _mm256_store_pd(tmp, x);
  
             // Scalar exp + payoff (std::exp has no AVX2 equivalent in standard C++)
-            for (int k = 0; k < 4; k++) {
-                double terminalPrice    = params.spotPrice * std::exp(exponentScratch[k]);
+            for (int k = 0; k < vecWidth; k++) {
+                double terminalPrice    = params.spotPrice * std::exp(tmp[k]);
                 double payoff           = std::max(terminalPrice - params.strikePrice, 0.0);
-                double discountedPayoff = discountFactor * payoff;
+                double discountedPayoff = discount * payoff;
  
                 totalSum        += discountedPayoff;
                 totalSumSquared += discountedPayoff * discountedPayoff;
@@ -108,9 +109,9 @@ struct CacheAwareVectorizedExecutionPolicy {
  
         // --- Scalar tail: handles remaining paths when numberOfPaths % 4 != 0
         for (; i < numberOfPaths; i++) {
-            double terminalPrice    = params.spotPrice * std::exp(precomputedDrift + precomputedVolSqrtT * randomNumbers[i]);
+            double terminalPrice    = params.spotPrice * std::exp(drift+ diff * randomNumbers[i]);
             double payoff           = std::max(terminalPrice - params.strikePrice, 0.0);
-            double discountedPayoff = discountFactor * payoff;
+            double discountedPayoff = discount * payoff;
  
             totalSum        += discountedPayoff;
             totalSumSquared += discountedPayoff * discountedPayoff;
