@@ -57,7 +57,40 @@ Please regularly update this file to record your project progress. You should be
 - Replaced merseene twister with xoshiro rng
 - Added vectorization
 
-## Week 22 to 24 [22/02 to 06/03]
+## Week 22–24 [22/02 to 06/03]
 
+- Refactored architecture into policy-based design:
+  - Execution policies (serial, vectorised, parallel)
+  - RNG policies (mt19937, xoshiro variants)
+  - Sampling policies (plain, antithetic)
+- Implemented efficient Monte Carlo sampling using precomputed constants  
+
+---
+
+## Week 24–26 [08/03 to 20/03]
+
+- Implemented cache-aware vectorised execution policy  
+  - Added aligned memory access patterns  
+  - Integrated SIMD-friendly loop structures  
+- Integrated SLEEF library for vectorised exponential computation  
+- Reduced branching in inner loops to improve SIMD utilisation  
+
+---
+
+## Week 26–28 [22/03 to 03/04]
+
+- Implemented OpenMP-based parallel execution policy  
+  - Distributed paths across CPU cores using `#pragma omp parallel for`  
+  - Introduced reduction variables for thread-safe accumulation  
+- Designed per-thread RNG (xoshiro) to eliminate contention  
+- Addressed false sharing and ensured thread-local independence  
+
+---
+
+## Week 28–Current [04/04 to 05/04]
+
+- Integrated Intel VTune profiling workflow:
+  - Identified hotspots in simulation loop  
+  - Analysed CPU utilisation and memory access patterns  
 
 
