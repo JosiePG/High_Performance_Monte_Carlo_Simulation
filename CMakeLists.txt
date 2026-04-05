@@ -14,7 +14,13 @@ target_include_directories(main PRIVATE
     src
 )
 
-target_compile_options(main PRIVATE /arch:AVX2 /openmp:llvm )
+if (MSVC)
+    target_compile_options(main PRIVATE /arch:AVX2 /openmp:llvm)
+else()
+    target_compile_options(main PRIVATE -mavx2 -fopenmp)
+endif()
+
+
 
 
 
