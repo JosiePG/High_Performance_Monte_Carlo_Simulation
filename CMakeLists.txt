@@ -6,10 +6,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(main
     src/main.cpp
-    # src/monte_carlo_engine.cpp
-    # src/variance_reduction_module.cpp
-    # src/optimized_mc_engine.cpp
-    # src/parallel_mc_engine.cpp
     src/simulation_helper.cpp
     src/imgui_setup.cpp
 )
@@ -26,6 +22,7 @@ find_package(glfw3 CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 find_package(implot CONFIG REQUIRED)
+find_package(sleef CONFIG REQUIRED)
 
 
 target_link_libraries(main PRIVATE
@@ -33,6 +30,7 @@ target_link_libraries(main PRIVATE
     glad::glad
     imgui::imgui
     implot::implot
+    sleef::sleef
 )
 
 if (WIN32)

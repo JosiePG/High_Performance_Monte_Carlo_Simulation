@@ -11,35 +11,12 @@
 #include "exec_policies.h"
 #include "black_scholes_model.h"
  
-// =============================================================================
-// IMonteCarloEngine
-//
-// A simple abstract base class so that different engine configurations
-// can be stored together and called through a common interface.
-//
-// The virtual call happens ONCE per simulation (not once per path),
-// so there is no performance cost inside the hot loop.
-// =============================================================================
 class IMonteCarloEngine {
 public:
     virtual std::pair<double, double> price(int numberOfPaths, const OptionParameters& params) = 0;
     virtual ~IMonteCarloEngine() = default;
 };
  
- 
-// =============================================================================
-// MonteCarloEngine<RngPolicy, SamplingPolicy, ExecutionPolicy>
-//
-// The composable engine. You choose one policy from each category:
-//
-//   RngPolicy       — how random numbers are generated
-//   SamplingPolicy  — plain paths or antithetic variance reduction
-//   ExecutionPolicy — serial / cache-aware AVX2 / OpenMP / OpenMP+AVX2
-//
-// All three policies are resolved at COMPILE TIME — the compiler sees
-// through every policy call and can inline and optimise them fully.
-// There is zero virtual dispatch or overhead inside the simulation loop.
-//
 
 
 template<

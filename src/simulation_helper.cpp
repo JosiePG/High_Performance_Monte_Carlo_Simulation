@@ -100,10 +100,6 @@ void SimulationHelper::RunModel(const OptionParameters& OptParams, SimulationPar
                 parallelEngine.price(SimParams.numPaths, OptParams);
                 modelName = "Parallel Model";
                 break;
-            case ModelType::PARALLEL_CACHE:
-                parallelAndCacheEngine.price(SimParams.numPaths, OptParams);
-                modelName = "Parallel + Cache Model";
-                break;
             case ModelType::ULTIMATE:
                 ultimateEngine.price(SimParams.numPaths, OptParams);
                 modelName = "Ultimate Model";
@@ -135,10 +131,6 @@ void SimulationHelper::RunModel(const OptionParameters& OptParams, SimulationPar
             case ModelType::PARALLEL:
                 result = parallelEngine.price(SimParams.numPaths, OptParams);
                 modelName = "Parallel Model";
-                break;
-            case ModelType::PARALLEL_CACHE:
-                result = parallelAndCacheEngine.price(SimParams.numPaths, OptParams);
-                modelName = "Parallel + Cache Model";
                 break;
             case ModelType::ULTIMATE:
                 result = ultimateEngine.price(SimParams.numPaths, OptParams);
@@ -262,10 +254,6 @@ void SimulationHelper::RunConvergencePlot(const OptionParameters& OptParams, Sim
             case ModelType::PARALLEL:
                 result = parallelEngine.price(SimParams.numPaths, OptParams);
                 modelName = "Parallel Model";
-                break;
-            case ModelType::PARALLEL_CACHE:
-                result = parallelAndCacheEngine.price(SimParams.numPaths, OptParams);
-                modelName = "Parallel + Cache Model";
                 break;
             case ModelType::ULTIMATE:
                 result = ultimateEngine.price(SimParams.numPaths, OptParams);

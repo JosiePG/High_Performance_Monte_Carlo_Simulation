@@ -3,18 +3,7 @@
 #include <cmath>
 #include <algorithm>
 #include "option_parameters.h"
- 
-// =============================================================================
-// POLICY: PlainMonteCarloSampling
-//
-// The standard Monte Carlo approach.
-// Each random variate z produces one simulated asset price via the
-// Geometric Brownian Motion (GBM) formula:
-//
-//   S_T = S * exp( (r - 0.5*sigma^2)*T  +  sigma*sqrt(T)*z )
-//
-// The payoff is then:  max(S_T - K, 0)
-// =============================================================================
+
 struct PlainMonteCarloSampling {
  
     void accumulatePath(double discountFactor,
@@ -64,18 +53,6 @@ struct EfficentMonteCarloSampling {
 
 
  
- 
-// =============================================================================
-// POLICY: AntitheticVariateSampling
-//
-// A variance reduction technique.
-// For each random variate z, also simulate a path using -z (the antithetic).
-// These two paths are negatively correlated, so averaging their payoffs
-// cancels out some of the Monte Carlo noise.
-//
-// Result: same number of RNG calls, but roughly half the variance.
-// The standard error therefore falls faster with fewer paths.
-// =============================================================================
 struct AntitheticVariateSampling {
  
     void accumulatePath(double discountFactor,

@@ -14,6 +14,7 @@ struct OptionParameters {
     double riskFreeRate;    // risk-free interest rate (r)
     double volatility;      // annualised volatility of the asset (sigma)
     OptionType optionType = OptionType::CALL;
+    
 };
 
 #endif

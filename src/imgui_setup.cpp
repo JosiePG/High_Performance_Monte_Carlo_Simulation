@@ -129,8 +129,7 @@ if (ImGui::BeginTable("OptionInputsTable", 2, ImGuiTableFlags_SizingStretchProp)
         "variance reduction mc model",
         "cache aware mc model",
         "parallel mc model",
-        "parallel + cache aware mc model",
-        "parallel + cache aware + variance reudction mc model"
+        "parallel  variance reudction mc model"
     };
 
     ImGui::TableNextRow();
@@ -292,7 +291,6 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
                 simData.iterations     = simParams.iterations;     
                 simData.std_error = resultsCache.standardError;
                 simData.mean_time = resultsCache.meanTime;
-                simData.min_time = resultsCache.minTime;
 
                 if(simHistory.size() <simHistoryCapacity){
                     simHistory.push_front(simData);
@@ -396,7 +394,7 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
             {
                 if (ImGui::BeginChild("HistoryChild", ImVec2(0, 200), true))
                 {
-                    if (ImGui::BeginTable("HistoryTable", 7, 
+                    if (ImGui::BeginTable("HistoryTable", 6, 
                         ImGuiTableFlags_Borders | 
                         ImGuiTableFlags_ScrollY |
                         ImGuiTableFlags_RowBg))
@@ -407,8 +405,7 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
                         ImGui::TableSetupColumn("Paths",     ImGuiTableColumnFlags_WidthFixed, 80.0f);
                         ImGui::TableSetupColumn("Iters",     ImGuiTableColumnFlags_WidthFixed, 60.0f);
                         ImGui::TableSetupColumn("Std Error", ImGuiTableColumnFlags_WidthStretch, 1.0f);
-                        ImGui::TableSetupColumn("Mean Time", ImGuiTableColumnFlags_WidthStretch, 1.0f);
-                        ImGui::TableSetupColumn("Min Time", ImGuiTableColumnFlags_WidthStretch, 1.0f);
+                        ImGui::TableSetupColumn("Mean Time (ms)", ImGuiTableColumnFlags_WidthStretch, 1.0f);
                         ImGui::TableHeadersRow();
 
                         for (auto& entry : simHistory)
@@ -420,7 +417,6 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
                             ImGui::TableNextColumn(); ImGui::Text("%d",   entry.iterations);
                             ImGui::TableNextColumn(); ImGui::Text("%.4f", entry.std_error);
                             ImGui::TableNextColumn(); ImGui::Text("%.2f", entry.mean_time);
-                            ImGui::TableNextColumn(); ImGui::Text("%.2f", entry.min_time);
                         }
                         ImGui::EndTable();
                     }
