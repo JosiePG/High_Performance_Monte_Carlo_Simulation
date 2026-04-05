@@ -1,5 +1,22 @@
 # High Performance Monte Carlo Simulation for Low-Latency European Option Pricing
 
+## Build Instructions
+
+### 1. Install vcpkg
+git clone https://github.com/microsoft/vcpkg
+
+### 2. Install dependencies
+vcpkg install
+
+### 3. Configure project
+cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=[vcpkg]/scripts/buildsystems/vcpkg.cmake
+
+### 4. Build
+cmake --build build
+
+### 5. Run
+./build/main
+
 ## Information about this repository
 
 This is the repository that you are going to use **individually** for developing your project. Please use the resources provided in the module to learn about **plagiarism** and how plagiarism awareness can foster your learning.
