@@ -125,16 +125,16 @@ if (ImGui::BeginTable("OptionInputsTable", 2, ImGuiTableFlags_SizingStretchProp)
 
     const char* models[] =
     {
-        "vanilla mc model",
-        "variance reduction mc model",
-        "cache aware mc model",
-        "parallel mc model",
-        "parallel  variance reudction mc model"
+        "vanilla",
+        "variance reduction",
+        "cache-aware + SIMD",
+        "OpenMP parallel",
+        "OpenMP + variance reduction"
     };
 
     ImGui::TableNextRow();
     ImGui::TableSetColumnIndex(0);
-    ImGui::Text("model");
+    ImGui::Text("monte carlo engine");
 
     ImGui::TableSetColumnIndex(1);
     ImGui::SetNextItemWidth(-FLT_MIN);

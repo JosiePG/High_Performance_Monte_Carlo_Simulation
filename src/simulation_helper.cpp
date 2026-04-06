@@ -134,7 +134,7 @@ void SimulationHelper::RunModel(const OptionParameters& OptParams, SimulationPar
                 break;
             case ModelType::ULTIMATE:
                 result = ultimateEngine.price(SimParams.numPaths, OptParams);
-                modelName = "Ultimate Model";
+                modelName = "Parallel + Variance Reduction Model";
                 break;
         }
 
@@ -252,12 +252,10 @@ void SimulationHelper::RunConvergencePlot(const OptionParameters& OptParams, Sim
                 result = cacheEngine.price(path, OptParams);
                 break;
             case ModelType::PARALLEL:
-                result = parallelEngine.price(SimParams.numPaths, OptParams);
-                modelName = "Parallel Model";
+                result = parallelEngine.price(path, OptParams);
                 break;
             case ModelType::ULTIMATE:
-                result = ultimateEngine.price(SimParams.numPaths, OptParams);
-                modelName = "Ultimate Model";
+                result = ultimateEngine.price(path, OptParams);
                 break;
         }
 

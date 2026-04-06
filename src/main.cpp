@@ -6,7 +6,7 @@
 // make gui window sizes look nice
 // set up readme 
 // store all profilling results in dedicated folders
-// clean up code
+// clean up code ( make sure namings make sense eg model / engine )
 // bonuses
 // fix mean and min time bug not appearing sometimes in sim history
 
