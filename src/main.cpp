@@ -1,11 +1,13 @@
 
 //TODO :
-// store all profilling results in dedicated folders
-// fix build config
-// clean up code
-// fix issue with cache aware being different in the results ***
-// set up readme 
+
+
 // add to project log and clean it up
+// fix cache aware module not calcuating put properly 
+// make gui window sizes look nice
+// set up readme 
+// store all profilling results in dedicated folders
+// clean up code
 // bonuses
 // determine what compiler to use - if time 
 // fix mean and min time bug not appearing sometimes in sim history

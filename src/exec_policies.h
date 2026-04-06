@@ -32,7 +32,6 @@ struct SerialExecutionPolicy {
     }
 };
  
- 
 
 
 struct CacheAwareVectorizedExecutionPolicy {
@@ -47,77 +46,53 @@ struct CacheAwareVectorizedExecutionPolicy {
                   SamplingPolicy&,
                   double& totalSum,
                   double& totalSumSquared) const {
+                    
+                    std::vector<double> randomNumbers = rngPolicy.generateNormals(numberOfPaths);
+                    __m256d spot_v  = _mm256_set1_pd(params.spotPrice); 
+                    __m256d drift_v = _mm256_set1_pd(drift);
+                    __m256d diff_v  = _mm256_set1_pd(diff);
 
-        std::vector<double> randomNumbers = rngPolicy.generateNormals(numberOfPaths);
 
-        // Broadcast constants
-        __m256d drift_v    = _mm256_set1_pd(drift);
-        __m256d diff_v     = _mm256_set1_pd(diff);
-        __m256d spot_v     = _mm256_set1_pd(params.spotPrice);
-        __m256d strike_v   = _mm256_set1_pd(params.strikePrice);
-        __m256d discount_v = _mm256_set1_pd(discount);
-        __m256d zero_v     = _mm256_setzero_pd();
+                    int i = 0;
+                    const int vecWidth = 4;
 
-        // SIMD accumulators
-        __m256d sum_v    = _mm256_setzero_pd();
-        __m256d sumsq_v  = _mm256_setzero_pd();
+                    alignas(32) double tmp[4];
 
-        int i = 0;
-        const int vecWidth = 4;
+                    for (; i + vecWidth <= numberOfPaths; i += vecWidth)
+                    {
+                        __m256d z = _mm256_loadu_pd(&randomNumbers[i]);
+                        __m256d x = _mm256_fmadd_pd(diff_v, z, drift_v);
+                        _mm256_store_pd(tmp, x);
 
-        // --- Fully vectorised loop ---
-        for (; i + vecWidth <= numberOfPaths; i += vecWidth) {
+                        for (int k = 0; k < 4; ++k)
+                        {
+                            double ST = params.spotPrice * std::exp(tmp[k]);
 
-            // Load randoms
-            __m256d z = _mm256_loadu_pd(&randomNumbers[i]);
+                            double payoff = (params.optionType == OptionType::CALL)
+                            ? std::max(terminalPrice - params.strikePrice, 0.0)
+                            : std::max(params.strikePrice - terminalPrice, 0.0);
+                            double discounted_payoff = discount * payoff;
+                            totalSum  += discounted_payoff;
+                            totalSumSquared  += discounted_payoff * discounted_payoff;
+                        }
+                    }
 
-            // x = drift + diff * z
-            __m256d x = _mm256_fmadd_pd(diff_v, z, drift_v);
+                    for (; i < numberOfPaths; ++i)
+                    {
+                        double ST = params.spotPrice * std::exp(drift + diff * randomNumbers[i]);
+                        double payoff = (params.optionType == OptionType::CALL)
+                      ? std::max(terminalPrice - params.strikePrice, 0.0)
+                      : std::max(params.strikePrice - terminalPrice, 0.0);
+                        double discounted_payoff = discount * payoff;
+                        totalSum  += discounted_payoff;
+                        totalSumSquared  += discounted_payoff * discounted_payoff;
+                    }
 
-            // Vectorized exp 
-            __m256d exp_x = Sleef_expd4_u10(x);
 
-            // terminal = S0 * exp(x)
-            __m256d terminal = _mm256_mul_pd(spot_v, exp_x);
-
-            // payoff = max(terminal - strike, 0)
-            __m256d payoff = _mm256_max_pd(
-                _mm256_sub_pd(terminal, strike_v),
-                zero_v
-            );
-
-            // discounted payoff
-            __m256d discounted = _mm256_mul_pd(discount_v, payoff);
-
-            // accumulate
-            sum_v   = _mm256_add_pd(sum_v, discounted);
-            sumsq_v = _mm256_fmadd_pd(discounted, discounted, sumsq_v);
-        }
-
-        // --- Horizontal reduction (SIMD → scalar) ---
-        alignas(32) double sum_arr[4];
-        alignas(32) double sumsq_arr[4];
-
-        _mm256_store_pd(sum_arr, sum_v);
-        _mm256_store_pd(sumsq_arr, sumsq_v);
-
-        for (int k = 0; k < 4; ++k) {
-            totalSum        += sum_arr[k];
-            totalSumSquared += sumsq_arr[k];
-        }
-
-        // --- Scalar tail ---
-        for (; i < numberOfPaths; i++) {
-            double x = drift + diff * randomNumbers[i];
-            double terminalPrice    = params.spotPrice * std::exp(x);
-            double payoff           = std::max(terminalPrice - params.strikePrice, 0.0);
-            double discountedPayoff = discount * payoff;
-
-            totalSum        += discountedPayoff;
-            totalSumSquared += discountedPayoff * discountedPayoff;
-        }
-    }
+                  }
 };
+
+
 struct OpenMPParallelExecutionPolicy {
  
     template<typename RngPolicy, typename SamplingPolicy>
