@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <immintrin.h>
 #include <omp.h>
-#include <sleef.h>
 #include "option_parameters.h"
 #include "rng_policies.h"
  
@@ -31,7 +30,6 @@ struct SerialExecutionPolicy {
         }
     }
 };
- 
 
 
 struct CacheAwareVectorizedExecutionPolicy {
@@ -69,8 +67,8 @@ struct CacheAwareVectorizedExecutionPolicy {
                             double ST = params.spotPrice * std::exp(tmp[k]);
 
                             double payoff = (params.optionType == OptionType::CALL)
-                            ? std::max(terminalPrice - params.strikePrice, 0.0)
-                            : std::max(params.strikePrice - terminalPrice, 0.0);
+                            ? std::max(ST - params.strikePrice, 0.0)
+                            : std::max(params.strikePrice - ST, 0.0);
                             double discounted_payoff = discount * payoff;
                             totalSum  += discounted_payoff;
                             totalSumSquared  += discounted_payoff * discounted_payoff;
@@ -81,8 +79,8 @@ struct CacheAwareVectorizedExecutionPolicy {
                     {
                         double ST = params.spotPrice * std::exp(drift + diff * randomNumbers[i]);
                         double payoff = (params.optionType == OptionType::CALL)
-                      ? std::max(terminalPrice - params.strikePrice, 0.0)
-                      : std::max(params.strikePrice - terminalPrice, 0.0);
+                        ? std::max(ST - params.strikePrice, 0.0)
+                        : std::max(params.strikePrice - ST, 0.0);
                         double discounted_payoff = discount * payoff;
                         totalSum  += discounted_payoff;
                         totalSumSquared  += discounted_payoff * discounted_payoff;

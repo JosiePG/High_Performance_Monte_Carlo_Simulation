@@ -193,7 +193,7 @@ void SimulationHelper::RunModel(const OptionParameters& OptParams, SimulationPar
     for (auto t : times) {
         sum += t;
     }
-    double meanTime = static_cast<double>(sum) / times.size();
+    double meanTime = times.empty() ? 0.0 : static_cast<double>(sum) / times.size();
     int64_t minTime = *std::min_element(times.begin(), times.end());
     
     {

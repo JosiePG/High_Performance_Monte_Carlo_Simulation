@@ -3,13 +3,11 @@
 
 
 // add to project log and clean it up
-// fix cache aware module not calcuating put properly 
 // make gui window sizes look nice
 // set up readme 
 // store all profilling results in dedicated folders
 // clean up code
 // bonuses
-// determine what compiler to use - if time 
 // fix mean and min time bug not appearing sometimes in sim history
 
  
@@ -84,14 +82,20 @@ int main() {
 
 // int no_of_paths = 1000000000;
 
-
 // MonteCarloEngine<XoshiroPerThreadGenerator,
 //                  EfficentMonteCarloSampling,
 //                  OpenMPParallelExecutionPolicy>
 //                      parallelEngine;
+
+
+
 //     auto result = parallelEngine.price(no_of_paths, optParams);
 //     return 0;
 // }
+    // MonteCarloEngine<StandardMersenneTwisterGenerator,
+    //              PlainMonteCarloSampling,
+    //              SerialExecutionPolicy>
+    //                  vEngine;
 // //     MonteCarloEngine<StandardMersenneTwisterGenerator,
 // //                      AntitheticVariateSampling,
 // //                      SerialExecutionPolicy>
