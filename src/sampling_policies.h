@@ -14,32 +14,6 @@ struct PlainMonteCarloSampling {
                         double& runningSum,
                         double& runningSumSquared) const {
  
-        double terminalPrice = params.spotPrice * std::exp(
-            (params.riskFreeRate - 0.5 * std::pow(params.volatility, 2.0))
-            * params.timeToMaturity
-            + params.volatility * std::sqrt(params.timeToMaturity) * randomVariate);
-
-        double payoff = (params.optionType == OptionType::CALL)
-                      ? std::max(terminalPrice - params.strikePrice, 0.0)
-                      : std::max(params.strikePrice - terminalPrice, 0.0);
-
-        double discountedPayoff = discountFactor * payoff;
- 
-        runningSum        += discountedPayoff;
-        runningSumSquared += discountedPayoff * discountedPayoff;
-    }
-};
-
-struct EfficentMonteCarloSampling {
- 
-    void accumulatePath(double discountFactor,
-                        double randomVariate,
-                        const OptionParameters& params,
-                        double precomputedDrift,
-                        double precomputedVolSqrtT,
-                        double& runningSum,
-                        double& runningSumSquared) const {
- 
         double terminalPrice   = params.spotPrice * std::exp(precomputedDrift + precomputedVolSqrtT * randomVariate);
         double payoff = (params.optionType == OptionType::CALL)
                       ? std::max(terminalPrice - params.strikePrice, 0.0)

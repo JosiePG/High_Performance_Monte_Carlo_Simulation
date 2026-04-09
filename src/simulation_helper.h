@@ -95,11 +95,11 @@ private:
                      SerialExecutionPolicy>
                      varianceEngine;
     MonteCarloEngine<XoshiroSingleThreadedGenerator,
-                 EfficentMonteCarloSampling,
+                 PlainMonteCarloSampling,
                  CacheAwareVectorizedExecutionPolicy>
                      cacheEngine;
 MonteCarloEngine<XoshiroPerThreadGenerator,
-                 EfficentMonteCarloSampling,
+                 PlainMonteCarloSampling,
                  OpenMPParallelExecutionPolicy>
                      parallelEngine;
      MonteCarloEngine<XoshiroPerThreadGenerator,
