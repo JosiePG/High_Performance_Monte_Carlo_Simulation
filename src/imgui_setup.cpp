@@ -52,10 +52,9 @@ void UseImGui::Update(SimulationHelper & simHelper){
     cachedProgress = simHelper.GetProgress();
     cachedIsRunning = simHelper.IsRunning();
 
-    ImGui::SetNextWindowSizeConstraints(
-    ImVec2(300.0f, 500.0f),          // min size
-    ImVec2(800.0f, 600.0f)      // max size
-);
+
+    ImGui::SetNextWindowSize(ImVec2(710, 650), ImGuiCond_Always);
+
 
     ImGui::Begin("Parameter Settings");
     ImGui::Text("(CTRL + Click) to enter input manually");
@@ -242,7 +241,7 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
     ImGui::End();
 
 
-    ImGui::SetNextWindowSizeConstraints(ImVec2(1000.0f, 800.0f),ImVec2(1200.0f, 900.0f));
+    ImGui::SetNextWindowSize(ImVec2(1150, 950), ImGuiCond_Always);
 
 
     if (showResults) {
@@ -432,7 +431,7 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
 
             
 
-    ImGui::SetNextWindowSizeConstraints(ImVec2(1000.0f, 400.0f),ImVec2(1200.0f, 600.0f));
+     ImGui::SetNextWindowSize(ImVec2(1150, 650), ImGuiCond_Always);
 
     if (showCResults)
 {
