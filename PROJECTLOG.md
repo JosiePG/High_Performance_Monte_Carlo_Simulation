@@ -87,10 +87,17 @@ Please regularly update this file to record your project progress. You should be
 
 ---
 
-## Week 28–Current [04/04 to 05/04]
+## Week 28 [04/04 to 10/04]
 
 - Integrated Intel VTune profiling workflow:
   - Identified hotspots in simulation loop  
   - Analysed CPU utilisation and memory access patterns  
+
+
+## Week 29 [11/04 to 19/04]
+- Finsihed writing first draft of dissertation 
+- Removed naive sampling policy and replaced with the more efficient plain sampling policy 
+- Re adjusted GUI window sizings , to make the UI feel more professional
+
 
 
