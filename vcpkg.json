@@ -8,7 +8,6 @@
 			"features": [ "glfw-binding", "opengl3-binding" ]
 		},
 		"glfw3",
-		"glad",
-		"sleef"
+		"glad"
   ]
 }

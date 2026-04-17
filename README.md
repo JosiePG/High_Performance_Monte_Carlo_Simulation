@@ -2,25 +2,155 @@
 
 ## Build Instructions
 
-### 1. Install vcpkg
+This project uses:
+
+* MSVC (Visual Studio Build Tools)
+* CMake presets
+* Ninja as the build system
+* vcpkg for dependencies
+
+
+## 1. Prerequisites
+
+Make sure you have installed:
+
+* CMake
+* Visual Studio Build Tools
+* Ninja build system
+* vcpkg
+
+---
+
+## 2. How to install vcpkg (if not already)
+
+```bash
 git clone https://github.com/microsoft/vcpkg
+```
 
-### 2. Install dependencies
+Then bootstrap:
+
+```bash
+./vcpkg/bootstrap-vcpkg.bat
+```
+
+---
+
+## 3. Install dependencies
+
+From the project root:
+
+```bash
 vcpkg install
+```
 
-### 3. Configure project
-cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=[vcpkg]/scripts/buildsystems/vcpkg.cmake
+Dependencies are defined in `vcpkg.json`.
 
-### 4. Build
-cmake --build build
+---
 
-### 5. Run
-./build/main
+## 4. Opening project
 
-## Information about this repository
+You must open VS Code with the MSVC environment loaded:
 
-This is the repository that you are going to use **individually** for developing your project. Please use the resources provided in the module to learn about **plagiarism** and how plagiarism awareness can foster your learning.
+1. Open:
 
-Regarding the use of this repository, once a feature (or part of it) is developed and **working** or parts of your system are integrated and **working**, define a commit and push it to the remote repository. You may find yourself making a commit after a productive hour of work (or even after 20 minutes!), for example. Choose commit message wisely and be concise.
+   ```
+   x64 Native Tools Command Prompt for VS 2022
+   ```
 
-Please choose the structure of the contents of this repository that suits the needs of your project but do indicate in this file where the main software artefacts are located.
+2. Navigate to your project:
+
+```bash
+cd path/to/your/project
+```
+
+3. Launch VS Code:
+
+```bash
+code .
+```
+
+---
+
+## 5. Configure project (using presets)
+
+In VS Code:
+
+* Press `Ctrl + Shift + P`
+* Select:
+
+  ```
+  CMake: Select Configure Preset
+  ```
+* Choose:
+
+  ```
+  msvc-relwithdebinfo
+  ```
+
+Then run:
+
+```
+CMake: Configure
+```
+
+---
+
+## 6. Build
+
+```
+CMake: Build
+```
+
+Or via terminal:
+
+```bash
+cmake --build out/build/msvc-relwithdebinfo
+```
+
+---
+
+## 7. Run
+
+Executable will be located in:
+
+```
+out/build/msvc-relwithdebinfo/
+```
+
+Run:
+
+```bash
+./main.exe
+```
+
+---
+
+##  Build Types
+
+* `Debug` → debugging only (slow)
+* `Release` → maximum performance
+* `RelWithDebInfo` →  recommended (fast + debuggable)
+
+---
+
+## Performance Notes
+
+This project enables:
+
+* AVX2 vectorization (`/arch:AVX2`)
+* OpenMP parallelism (`/openmp:llvm`)
+
+For accurate performance measurements, use:
+
+```
+RelWithDebInfo or Release
+```
+
+---
+
+## Project Structure
+
+* `src/` → source files
+* `CMakeLists.txt` → build configuration
+* `CMakePresets.json` → build presets
+* `vcpkg.json` → dependency definitions

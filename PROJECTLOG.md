@@ -1,9 +1,5 @@
 # Project Log
 
-Please regularly update this file to record your project progress. You should be updating the project log _at least_ once a fortnight.
-- detail your actions here
-- you can include details of commits if necessary
-- alternatively, details of any reading you have completed in support of your project
 ## Week 1 [6/10 to 12/10 2025]
 
 - Read Monte Carlo Simulation for European Option Pricing: Methodology, Error Analysis, and Algorithmic Enhancements
