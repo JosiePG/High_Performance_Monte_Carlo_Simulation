@@ -4,6 +4,7 @@
 #include <algorithm>
 #include "option_parameters.h"
 
+// Standard Monte Carlo sampling, simulates one path per random draw
 struct PlainMonteCarloSampling {
  
     void accumulatePath(double discountFactor,
@@ -14,19 +15,23 @@ struct PlainMonteCarloSampling {
                         double& runningSum,
                         double& runningSumSquared) const {
  
-        double terminalPrice   = params.spotPrice * std::exp(precomputedDrift + precomputedVolSqrtT * randomVariate);
+        // Simulates terminal asset price under geometric Brownian motion
+        double terminalPrice   = params.spotPrice * std::exp(precomputedDrift + precomputedVolSqrtT * randomVariate);// S_T = S_0 * exp((r - 0.5*sigma^2)*T + sigma*sqrt(T)*Z)
+        // Computes payoff depending on option type
         double payoff = (params.optionType == OptionType::CALL)
                       ? std::max(terminalPrice - params.strikePrice, 0.0)
                       : std::max(params.strikePrice - terminalPrice, 0.0);
-        double discountedPayoff = discountFactor * payoff;
+        // Discounst payoff back to present value
+        double discountedPayoff = discountFactor * payoff;// exp(-rT) * payoff
  
+        // Accumulates results for mean and variance estimation
         runningSum        += discountedPayoff;
         runningSumSquared += discountedPayoff * discountedPayoff;
     }
 };
 
 
- 
+// Antithetic Variate Monte Carlo sampling, for each random draw Z, -Z is also used
 struct AntitheticVariateSampling {
  
     void accumulatePath(double discountFactor,
@@ -43,6 +48,7 @@ struct AntitheticVariateSampling {
         // Antithetic path using -z
         double terminalPrice2  = params.spotPrice * std::exp(precomputedDrift + precomputedVolSqrtT * -randomVariate);
 
+        // Computes both payoffs
         double payoff1, payoff2;
         if (params.optionType == OptionType::CALL) {
             payoff1 = std::max(terminalPrice1 - params.strikePrice, 0.0);
@@ -52,9 +58,10 @@ struct AntitheticVariateSampling {
             payoff2 = std::max(params.strikePrice - terminalPrice2, 0.0);
         }
  
-        // Average the two payoffs — this is what reduces variance
+        // Averages the two payoffs, this reduces variance because errors in +Z and -Z tend to cancel out
         double averagePayoff   = 0.5 * discountFactor * (payoff1 + payoff2);
  
+         // Accumulates averaged result
         runningSum        += averagePayoff;
         runningSumSquared += averagePayoff * averagePayoff;
     }
