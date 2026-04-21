@@ -1,41 +1,36 @@
 
 //TODO :
-
-
 // add to project log and clean it up
-// make gui window sizes look nice
-// set up readme 
-// store all profilling results in dedicated folders
 // clean up code ( make sure namings make sense eg model / engine )
 // bonuses
 // fix mean and min time bug not appearing sometimes in sim history
 
- 
-
-#include <iostream>
+#include "black_scholes_model.h"
 #include "monte_carlo_engine.h"
 #include "option_parameters.h"
-#include "black_scholes_model.h"
 #include "simulation_helper.h"
 #include "imgui_setup.h"
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
+#include <iostream>
+
+
 
 
 int main() {
 
     // Ui config
-	if (!glfwInit())
-		return 1;
+
+	if (!glfwInit()) return 1; //Initializes GLFW
 	const char *glsl_version = "#version 130";
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); // Requests OpenGL 3.0 context
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
-	GLFWwindow *window = glfwCreateWindow(1920,1080, "Monte Carlo Option Pricing Simulation", NULL, NULL);
+	GLFWwindow *window = glfwCreateWindow(1920,1080, "Monte Carlo Option Pricing Simulation", NULL, NULL); // creates main application window
 	if (window == NULL)
 		return 1;
 	glfwMakeContextCurrent(window);
-	glfwSwapInterval(1); // Enables vsync
+	glfwSwapInterval(1);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	throw("Unable to context to OpenGL");
@@ -44,13 +39,15 @@ int main() {
 	glfwGetFramebufferSize(window, &screen_width, &screen_height);
 	glViewport(0, 0, screen_width, screen_height);
 
+    // Initializes the UseImGui helper object
     UseImGui myimgui;
     myimgui.Init(window,glsl_version);
 
-    SimulationHelper simHelper; // creating the simulation helper object
+    SimulationHelper simHelper; // Creating the simulation helper object
     
+    // Main application loop
     while(!glfwWindowShouldClose(window)){
-        glfwPollEvents();
+        glfwPollEvents(); // Handles input events 
         myimgui.NewFrame();
         myimgui.Update(simHelper);
         myimgui.Render();
@@ -82,33 +79,32 @@ int main() {
 
 // int no_of_paths = 1000000000;
 
-// MonteCarloEngine<XoshiroPerThreadGenerator,
-//                  EfficentMonteCarloSampling,
-//                  OpenMPParallelExecutionPolicy>
-//                      parallelEngine;
+//      MonteCarloEngine<XoshiroPerThreadGenerator,
+//                      AntitheticVariateSampling,
+//                      OpenMPParallelExecutionPolicy>
+//                      ultimateEngine;
 
 
-
-//     auto result = parallelEngine.price(no_of_paths, optParams);
+//     auto result = ultimateEngine.price(no_of_paths, optParams);
 //     return 0;
 // }
     // MonteCarloEngine<StandardMersenneTwisterGenerator,
     //              PlainMonteCarloSampling,
     //              SerialExecutionPolicy>
-    //                  vEngine;
-// //     MonteCarloEngine<StandardMersenneTwisterGenerator,
-// //                      AntitheticVariateSampling,
-// //                      SerialExecutionPolicy>
-// //                      varianceEngine;
-// //     MonteCarloEngine<XoshiroSingleThreadedGenerator,
-// //                  EfficentMonteCarloSampling,
-// //                  CacheAwareVectorizedExecutionPolicy>
-// //                      cacheEngine;
-// // MonteCarloEngine<XoshiroPerThreadGenerator,
-// //                  EfficentMonteCarloSampling,
-// //                  OpenMPParallelExecutionPolicy>
-// //                      parallelEngine;
-// //      MonteCarloEngine<XoshiroPerThreadGenerator,
-// //                      AntitheticVariateSampling,
-// //                      OpenMPParallelExecutionPolicy>
-// //                      ultimateEngine;
+    //                  vanillaEngine;
+//     MonteCarloEngine<StandardMersenneTwisterGenerator,
+//                      AntitheticVariateSampling,
+//                      SerialExecutionPolicy>
+//                      varianceEngine;
+//     MonteCarloEngine<XoshiroSingleThreadedGenerator,
+//                  PlainMonteCarloSampling,
+//                  CacheAwareVectorizedExecutionPolicy>
+//                      cacheEngine;
+// MonteCarloEngine<XoshiroPerThreadGenerator,
+//                  PlainMonteCarloSampling,
+//                  OpenMPParallelExecutionPolicy>
+//                      parallelEngine;
+//      MonteCarloEngine<XoshiroPerThreadGenerator,
+//                      AntitheticVariateSampling,
+//                      OpenMPParallelExecutionPolicy>
+//                      parallel_and_varianceEngine;

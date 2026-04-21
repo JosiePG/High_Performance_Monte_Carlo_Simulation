@@ -11,6 +11,7 @@
 #include "exec_policies.h"
 #include "black_scholes_model.h"
  
+// Abstract base class (inerface) for any Monte Carlo engine
 class IMonteCarloEngine {
 public:
     virtual std::pair<double, double> price(int numberOfPaths, const OptionParameters& params) = 0;
@@ -18,6 +19,10 @@ public:
 };
  
 
+// Templated Monte Carlo engine using policy-based design
+// RngPolicy: how random numbers are generated
+// SamplingPolicy: how paths/payoffs are sampled 
+// ExecutionPolicy: how computation is executed 
 
 template<
     typename RngPolicy,
@@ -36,23 +41,26 @@ public:
  
     std::pair<double, double> price(int numberOfPaths, const OptionParameters& params) override {
  
-        double totalSum        = 0.0;
-        double totalSumSquared = 0.0;
+        // Accumulators for Monte Carlo estimation
+        double totalSum        = 0.0; // Sum of discounted payoffs
+        double totalSumSquared = 0.0; // Sum of squared payoffs (for variance calculation)
  
         // Pre-compute constants that are the same for every path
         // Doing this outside the loop avoids repeated multiplications
         double precomputedDrift    = (params.riskFreeRate - 0.5 * params.volatility * params.volatility)
-                                      * params.timeToMaturity;
-        double precomputedVolSqrtT = params.volatility * std::sqrt(params.timeToMaturity);
-        double discountFactor      = std::exp(-params.riskFreeRate * params.timeToMaturity);
+                                      * params.timeToMaturity; // Drift term: (r - 0.5 * sigma^2) * T
+
+        double precomputedVolSqrtT = params.volatility * std::sqrt(params.timeToMaturity); // Volatility scaling: sigma * sqrt(T)
+
+        double discountFactor      = std::exp(-params.riskFreeRate * params.timeToMaturity);// Discount factor: exp(-rT)
  
-        // Hand off to whichever execution policy was chosen at compile time
+        // Hands off to whichever execution policy was chosen at compile time
         executionPolicy.runPaths(numberOfPaths, params,
                                   precomputedDrift, precomputedVolSqrtT, discountFactor,
                                   rngPolicy, samplingPolicy,
                                   totalSum, totalSumSquared);
  
-        // Compute the final price estimate and its standard error
+        // Computes the final price estimate and its standard error
         double estimatedPrice = totalSum / numberOfPaths;
         double variance       = (totalSumSquared - numberOfPaths * estimatedPrice * estimatedPrice)
                                  / (numberOfPaths - 1);
