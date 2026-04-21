@@ -12,11 +12,12 @@ SimulationHelper::~SimulationHelper() {
     StopSimulation();
 }
 
+// Starts a simulation in a separate thread
 void SimulationHelper::StartSimulation(const OptionParameters& OptParams, SimulationParams& SimParams,bool isConvergencePlot) {
-        StopSimulation(); 
+        StopSimulation(); // Ensures no previous simulation is running
     
     {
-        std::lock_guard<std::mutex> lock(resultsMutex); //
+        std::lock_guard<std::mutex> lock(resultsMutex); // Lock while updating shared state
         currentOptParams = OptParams;
         currentSimParams = SimParams;
         currentResults = SimulationResults();
@@ -26,6 +27,7 @@ void SimulationHelper::StartSimulation(const OptionParameters& OptParams, Simula
     isRunning.store(true);
     progress.store(0.0);
 
+     // Launches appropriate worker thread
     if(isConvergencePlot){
         simThread = std::thread(&SimulationHelper::ConvergencePlotThread, this);
     }else{
@@ -36,6 +38,7 @@ void SimulationHelper::StartSimulation(const OptionParameters& OptParams, Simula
     
 }
 
+// Stops simulation safely
 void SimulationHelper::StopSimulation() {
     shouldStop.store(true);
     
@@ -45,24 +48,28 @@ void SimulationHelper::StopSimulation() {
     
 }
 
+// Thread-safe access to results
 SimulationResults SimulationHelper::GetResults() const {
     std::lock_guard<std::mutex> lock(resultsMutex);
     return currentResults; 
 }
 
+// Entry point for standard benchmark simulation
 void SimulationHelper::SimulationThread() {
     RunModel(currentOptParams,currentSimParams);
     isRunning.store(false);
 }
 
+// Entry point for convergence plot simulation
  void SimulationHelper::ConvergencePlotThread(){
     RunConvergencePlot(currentOptParams,currentSimParams);
     isRunning.store(false);
  }
 
+// Main benchmark logic
 void SimulationHelper::RunModel(const OptionParameters& OptParams, SimulationParams& SimParams) {
 
-    std::vector<int64_t> times;
+    std::vector<int64_t> times; // Stores execution times
     std::vector<double> estimatedValues;
     double min_value = std::numeric_limits<double>::max();
     double max_value = std::numeric_limits<double>::min();
@@ -71,6 +78,7 @@ void SimulationHelper::RunModel(const OptionParameters& OptParams, SimulationPar
     double estimatedValue = 0.0;
     std::string modelName;
     
+    // Computes analytical Black-Scholes value for comparison
     BlackScholes bsValueEngine(OptParams.spotPrice, OptParams.strikePrice, 
     OptParams.timeToMaturity, OptParams.riskFreeRate, OptParams.volatility);
     double bsValue = (OptParams.optionType == OptionType::CALL)
@@ -106,6 +114,7 @@ void SimulationHelper::RunModel(const OptionParameters& OptParams, SimulationPar
                 break;
         }
         
+        // First 10% of progress is for warm-up
         progress.store(static_cast<double>(i) / 100.0 * 0.1); 
     }
     
@@ -118,6 +127,7 @@ void SimulationHelper::RunModel(const OptionParameters& OptParams, SimulationPar
         
         auto start = std::chrono::high_resolution_clock::now();
         
+        // Runs selected model
         switch (SimParams.modelType) {
             case ModelType::VANILLA:
                 result = vanillaEngine.price(SimParams.numPaths, OptParams);
@@ -142,19 +152,21 @@ void SimulationHelper::RunModel(const OptionParameters& OptParams, SimulationPar
         standardError = result.second;
         
         auto end = std::chrono::high_resolution_clock::now();
+        // Measures execution time in microseconds
         int64_t duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
         times.push_back(duration);
 
+         // Tracks min/max estimates
         estimatedValues.push_back(estimatedValue);
         if (estimatedValue < min_value) min_value = estimatedValue;
         if (estimatedValue > max_value) max_value = estimatedValue;
 
         
-        
+        // Updates progress
         progress.store(0.1 + (static_cast<double>(i + 1) / NUM_RUNS) * 0.9);
-
+        
+        // Updating results every 10 iterations to avoid over locking 
         if (SimParams.iterations>=100){
-        // updating results every 10 iterations to avoid over locking 
         if (i % (NUM_RUNS/100) == 0 || i == NUM_RUNS - 1) {
             std::lock_guard<std::mutex> lock(resultsMutex);
             currentResults.estimatedValue = estimatedValue;
@@ -217,9 +229,10 @@ void SimulationHelper::RunModel(const OptionParameters& OptParams, SimulationPar
     progress.store(1.0);
 }
 
+// core-logic for convergance plot simulation
 void SimulationHelper::RunConvergencePlot(const OptionParameters& OptParams, SimulationParams& SimParams) {
-    std::vector<double> errors;
-    std::vector<double> paths;
+    std::vector<double> errors;// Stores standard errors for each path size (y-axis of convergence plot)
+    std::vector<double> paths;// Stores number of paths used (x-axis of convergence plot)
     std::pair<double,double> result;
     double standardError = 0.0;
     double estimatedValue = 0.0;
@@ -235,12 +248,14 @@ void SimulationHelper::RunConvergencePlot(const OptionParameters& OptParams, Sim
                  : bs.putPrice();
     
 
+    // Loops over increasing path sizes to observe convergence
     for(int path:numPaths){
+        // Allows for early termination if user stops simulation
         if (shouldStop.load()) {
             return;
         }
         
-        
+        // Selects and runs the chosen Monte Carlo model
         switch (SimParams.modelType) {
             case ModelType::VANILLA:
                 result = vanillaEngine.price(path, OptParams);
@@ -269,6 +284,7 @@ void SimulationHelper::RunConvergencePlot(const OptionParameters& OptParams, Sim
         progress.store(static_cast<double>(paths.size()) / numPaths.size());
 
 
+        // Updates shared results (protected by mutex)
         std::lock_guard<std::mutex> lock(resultsMutex);
         currentResults.convergencePaths = paths;
         currentResults.convergenceSE = errors;
