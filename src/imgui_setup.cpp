@@ -12,18 +12,20 @@ void UseImGui::Init(GLFWwindow* window,const char* glsl_version){
     ImPlot::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
     
+    // Loads a custom monospace font for the UI
     io.Fonts->AddFontFromFileTTF(
     "fonts/SplineSansMono[wght].ttf",
     22.0f   
 );
     
  
-    ImGui_ImplGlfw_InitForOpenGL(window,true); // creates the main window
+    ImGui_ImplGlfw_InitForOpenGL(window,true); // Creates the main window
     ImGui_ImplOpenGL3_Init(glsl_version);
     ImGui::StyleColorsClassic();
 
 }
 
+// Starts a new frame for both backend rendering and ImGui drawing.
 void UseImGui::NewFrame(){
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
@@ -32,6 +34,7 @@ void UseImGui::NewFrame(){
 
 }
 
+// Builds the full user interface and connects it to simulation state.
 void UseImGui::Update(SimulationHelper & simHelper){
 
 // stores the real time plot data
@@ -45,9 +48,10 @@ void UseImGui::Update(SimulationHelper & simHelper){
         }
     };
 
-    static RollingBuffer   rdata;
-    static RollingBuffer   edata;
+    static RollingBuffer   rdata; // Estimated value over iterations
+    static RollingBuffer   edata; // Absolute error over iterations
 
+    // Pulls the latest state from the simulation helper.
     resultsCache = simHelper.GetResults();
     cachedProgress = simHelper.GetProgress();
     cachedIsRunning = simHelper.IsRunning();
@@ -56,10 +60,12 @@ void UseImGui::Update(SimulationHelper & simHelper){
     ImGui::SetNextWindowSize(ImVec2(710, 650), ImGuiCond_Always);
 
 
+    // Main parameter input window.
     ImGui::Begin("Parameter Settings");
     ImGui::Text("(CTRL + Click) to enter input manually");
     ImGui::SeparatorText("Option Inputs");
 
+    // User-editable option inputs.
     static float spotPrice = 100.0;
     static float strikePrice = 100.0;
     static float timeToMaturity = 1.0;
@@ -71,11 +77,13 @@ void UseImGui::Update(SimulationHelper & simHelper){
     static int iterations = 1000;
     
 
+    // Table for laying out option inputs.
 if (ImGui::BeginTable("OptionInputsTable", 2, ImGuiTableFlags_SizingStretchProp))
 {
     ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_WidthStretch, 0.6f);
     ImGui::TableSetupColumn("Input", ImGuiTableColumnFlags_WidthStretch, 0.6f);
 
+    // Helper lambda for drag-based float input rows.
     auto RowDragFloat = [](const char* label, float* value,
                        float speed,
                        float minVal,
@@ -95,6 +103,7 @@ if (ImGui::BeginTable("OptionInputsTable", 2, ImGuiTableFlags_SizingStretchProp)
     ImGui::DragFloat(id.c_str(),value,speed,minVal,maxVal,fmt,ImGuiSliderFlags_AlwaysClamp); // clamp ensures user cant go below min or max values
 };
 
+    // Option input fields.
     RowDragFloat("spot price", &spotPrice, 1.0f, 0.0f, FLT_MAX, "%.2f");
     RowDragFloat("strike price", &strikePrice, 1.0f, 0.0f, FLT_MAX, "%.2f");
     RowDragFloat("time to maturity (years)", &timeToMaturity, 0.05f, 0.0f, FLT_MAX, "%.3f");
@@ -103,6 +112,7 @@ if (ImGui::BeginTable("OptionInputsTable", 2, ImGuiTableFlags_SizingStretchProp)
 
    
 
+    // Option type selector.
     const char* optionTypes[] = { "Call", "Put" };
     ImGui::TableNextRow();
     ImGui::TableSetColumnIndex(0);
@@ -113,7 +123,7 @@ if (ImGui::BeginTable("OptionInputsTable", 2, ImGuiTableFlags_SizingStretchProp)
 
     
 
-
+    // Number of Monte Carlo paths.
     ImGui::TableNextRow();
     ImGui::TableSetColumnIndex(0);
     ImGui::Text("number of paths");
@@ -122,6 +132,7 @@ if (ImGui::BeginTable("OptionInputsTable", 2, ImGuiTableFlags_SizingStretchProp)
     ImGui::SetNextItemWidth(-FLT_MIN);
     ImGui::SliderInt("##paths", &no_of_paths, 30, 1000000,"%d",ImGuiSliderFlags_AlwaysClamp); // minimum is 30 to meet central limit theorm requirements 
 
+    // Available simulation engine choices.
     const char* models[] =
     {
         "vanilla",
@@ -150,6 +161,7 @@ if (ImGui::BeginTable("OptionInputsTable", 2, ImGuiTableFlags_SizingStretchProp)
 
 ImGui::SeparatorText("Simulation Inputs");
 
+// Table for simulation parameters.
 if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretchProp))
 {
     ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_WidthStretch, 0.6f);
@@ -166,13 +178,14 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
 
 }
 
-    
+    // Disables controls when a simulation is already running.
     if (cachedIsRunning) {
         ImGui::BeginDisabled();
     }
 
     ImGui::Dummy(ImVec2(0.0f, 10.0f)); // adds spacing
     
+    // Starts a benchmark simulation with the current inputs.
     if (ImGui::Button("Benchmark Simulation", ImVec2(250, 40))) {
 
         optParams.spotPrice       = spotPrice;
@@ -186,6 +199,8 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
         simParams.iterations      = iterations;
 
         simHelper.StartSimulation(optParams,simParams,false);
+
+        // Controls which result windows/plots should be visible.
         showPlot = (iterations >= 50 &&no_of_paths>=10000);
         showResults = true;
         resultsWindowOpen = true;
@@ -194,6 +209,7 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
         showEstimatePlot = true;
         showErrorPlot = false;
 
+        // Resets plot buffers and history state for the new run.
         historyAdded = false;
         rdata.Data.clear();
         edata.Data.clear();
@@ -205,7 +221,7 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
         ImGui::SameLine();
         ImGui::Text("Running...");
     }
-    
+     // Manual stop button.
     if (cachedIsRunning && ImGui::Button("Stop Simulation", ImVec2(200, 40))) {
         simHelper.StopSimulation();
     }
@@ -216,6 +232,7 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
 
     ImGui::Dummy(ImVec2(0.0f, 10.0f));
 
+    // Starts the convergence plot run.
         if (ImGui::Button("Run Convergance Plot", ImVec2(250, 40))) {
         optParams.spotPrice       = 100.0;
         optParams.strikePrice     = 100.0;
@@ -244,6 +261,7 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
     ImGui::SetNextWindowSize(ImVec2(1150, 950), ImGuiCond_Always);
 
 
+    // Main simulation output window.
     if (showResults) {
         ImGui::Begin("Simulation Results", &showResults);
         
@@ -252,12 +270,14 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
             showResults = false;
         }
         
+        // Shows progress while simulation is still running.
         if (cachedIsRunning) {
             ImGui::SeparatorText("Simulation in Progress");
             ImGui::ProgressBar(cachedProgress, ImVec2(-1.0f, 0.0f));
             ImGui::Text("Iterations: %llu /%llu", resultsCache.iterationsCompleted,simParams.iterations);
         }
         
+        // Once results are available, summary statistics are displayed.
         if (resultsCache.isComplete || resultsCache.iterationsCompleted > 0) {
             ImGui::SeparatorText("Results");
             ImGui::Text("Model: %s", resultsCache.modelName.c_str());
@@ -283,6 +303,7 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
             ImGui::Checkbox("Show Plot", &showPlot);
             ImGui::EndDisabled();
 
+            // Adds simulation run to history once
             if(!simHelper.IsRunning() && !historyAdded){
                 simData.model = resultsCache.modelName;
                 simData.optionType     = (optParams.optionType == OptionType::CALL) ? "Call" : "Put";
@@ -300,10 +321,13 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
                 historyAdded = true;
             }
 
+            // The plot toggle is only active when the benchmark size is large enough.
             if ((iterations < 50 || no_of_paths<10000) && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
             {
             ImGui::SetTooltip("Warning : iterations to low (<50) or number of paths to low (<10000), unable to load plot");
             }
+
+            // Shows live estimate/error plots.
 
             if (showPlot){
 
@@ -323,6 +347,7 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
                     lastIteration = resultsCache.iterationsCompleted;
                 }
 
+                // Calculates Y-axis ranges for the estimate plot.
                 float ymin = FLT_MAX;
                 float ymax = -FLT_MAX;
 
@@ -331,6 +356,8 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
                     ymax = std::max(ymax, p.y);
                 }
 
+                
+                // Calculates Y-axis ranges for the error plot.
                 float ymin_e = FLT_MAX;
                 float ymax_e = -FLT_MAX;
 
@@ -340,6 +367,7 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
                 }
                 
     
+                // Reference line data for the theoretical value.
                 double tdata1[20], tdata2[20];
                 for (int i = 0; i < 20; ++i)  {
                     tdata1[i] = (double)i*((double)simParams.iterations/10.0);
@@ -356,6 +384,7 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
                 
 
 
+                // Plots estimated value against theoretical Black-Scholes value.
                 if (showEstimatePlot) {
                 if (ImPlot::BeginPlot("Theoretical Values vs Estimate Value", ImVec2(-1,400))) {
                     ImPlot::SetupAxes("Benchmark Iterations", "Theoretical Value");
@@ -371,6 +400,7 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
 
                 ImGui::Dummy(ImVec2(0,10));
 
+                // Plots absolute error across iterations.
                 if (showErrorPlot) {
                 if (ImPlot::BeginPlot("Absolute Error of Estimate Value", ImVec2(-1,400))) {
                     ImPlot::SetupAxes("Benchmark Iterations", "Absolute Error");
@@ -389,6 +419,7 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
             ImGui::Text("No results yet. Click 'Run Simulation' to start.");
         }
 
+        // Creates simulation histriy widget
     if (ImGui::CollapsingHeader("Simulation History"))
             {
                 if (ImGui::BeginChild("HistoryChild", ImVec2(0, 200), true))
@@ -433,6 +464,7 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
 
      ImGui::SetNextWindowSize(ImVec2(1150, 650), ImGuiCond_Always);
 
+     // Creates separate window for standard-error convergence plot.
     if (showCResults)
 {
     ImGui::Begin("Convergence Results", &showCResults);
@@ -443,6 +475,7 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
         ImPlot::SetupAxisScale(ImAxis_Y1, ImPlotScale_Linear);
         
 
+        // Fixed axis limits for convergence visualization.
         ImPlot::SetupAxisLimits(ImAxis_X1, 900, 1010000, ImGuiCond_Always);
         ImPlot::SetupAxisLimits(ImAxis_Y1, 0.0, 0.5, ImGuiCond_Always);
         
@@ -463,11 +496,13 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
 
 }
 
+// Submits the current ImGui frame for rendering.
 void UseImGui::Render(){
     ImGui::Render();
 
 }
 
+// Destroys ImGui / ImPlot contexts.
 void UseImGui::Shutdown(){
     ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
