@@ -462,22 +462,25 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
 
             
 
-     ImGui::SetNextWindowSize(ImVec2(1150, 650), ImGuiCond_Always);
+     ImGui::SetNextWindowSize(ImVec2(1150, 950), ImGuiCond_Always);
 
      // Creates separate window for standard-error convergence plot.
     if (showCResults)
 {
     ImGui::Begin("Convergence Results", &showCResults);
     if (showCPlot){
-    if (ImPlot::BeginPlot("Standard Error Convergence", ImVec2(-1,400)))
+    if (ImPlot::BeginPlot("Standard Error Convergence", ImVec2(-1,-1)))
     {
-     ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Log10);
+        constexpr double X_MIN = 950;      // lower bound for log-scale
+        constexpr double X_MAX = 1100000;      // upper bound with headroom beyond max path count
+        constexpr double Y_MIN = 0.0;      // standard error lower bound
+        constexpr double Y_MAX = 0.5;      // standard error upper bound
+        ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Log10);
         ImPlot::SetupAxisScale(ImAxis_Y1, ImPlotScale_Linear);
         
-
         // Fixed axis limits for convergence visualization.
-        ImPlot::SetupAxisLimits(ImAxis_X1, 900, 1010000, ImGuiCond_Always);
-        ImPlot::SetupAxisLimits(ImAxis_Y1, 0.0, 0.5, ImGuiCond_Always);
+        ImPlot::SetupAxisLimits(ImAxis_X1, X_MIN, X_MAX, ImGuiCond_Always);
+        ImPlot::SetupAxisLimits(ImAxis_Y1, Y_MIN, Y_MAX, ImGuiCond_Always);
         
         ImPlot::SetupAxes("Number of Paths (log scale)", "Standard Error");
 
