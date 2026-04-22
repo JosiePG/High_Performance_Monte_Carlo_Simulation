@@ -108,8 +108,8 @@ void SimulationHelper::RunModel(const OptionParameters& OptParams, SimulationPar
                 parallelEngine.price(SimParams.numPaths, OptParams);
                 modelName = "Parallel Model";
                 break;
-            case ModelType::ULTIMATE:
-                ultimateEngine.price(SimParams.numPaths, OptParams);
+            case ModelType::PARALLEL_VARIANCE_REDUCTION:
+                parallelVarianceEngine.price(SimParams.numPaths, OptParams);
                 modelName = "Ultimate Model";
                 break;
         }
@@ -142,8 +142,8 @@ void SimulationHelper::RunModel(const OptionParameters& OptParams, SimulationPar
                 result = parallelEngine.price(SimParams.numPaths, OptParams);
                 modelName = "Parallel Model";
                 break;
-            case ModelType::ULTIMATE:
-                result = ultimateEngine.price(SimParams.numPaths, OptParams);
+            case ModelType::PARALLEL_VARIANCE_REDUCTION:
+                result = parallelVarianceEngine.price(SimParams.numPaths, OptParams);
                 modelName = "Parallel + Variance Reduction Model";
                 break;
         }
@@ -269,8 +269,8 @@ void SimulationHelper::RunConvergencePlot(const OptionParameters& OptParams, Sim
             case ModelType::PARALLEL:
                 result = parallelEngine.price(path, OptParams);
                 break;
-            case ModelType::ULTIMATE:
-                result = ultimateEngine.price(path, OptParams);
+            case ModelType::PARALLEL_VARIANCE_REDUCTION:
+                result = parallelVarianceEngine.price(path, OptParams);
                 break;
         }
 

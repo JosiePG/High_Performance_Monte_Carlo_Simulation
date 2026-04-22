@@ -18,7 +18,7 @@ enum class ModelType {
     VARIANCE_REDUCTION = 1,
     CACHE_AWARE = 2,
     PARALLEL = 3,
-    ULTIMATE = 4,
+    PARALLEL_VARIANCE_REDUCTION = 4,
 };
 
 // Input parameters controlling simulation behaviour
@@ -114,7 +114,7 @@ MonteCarloEngine<XoshiroPerThreadGenerator,
      MonteCarloEngine<XoshiroPerThreadGenerator,
                      AntitheticVariateSampling,
                      OpenMPParallelExecutionPolicy>
-                     ultimateEngine;
+                     parallelVarianceEngine;
 };
 
 
