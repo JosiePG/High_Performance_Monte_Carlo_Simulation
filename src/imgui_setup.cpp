@@ -390,10 +390,16 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
                     ImPlot::SetupAxes("Benchmark Iterations", "Theoretical Value");
                     ImPlot::SetupAxisLimits(ImAxis_X1,0,simParams.iterations, ImGuiCond_Always);
                     ImPlot::SetupAxisLimits(ImAxis_Y1,ymin,ymax ,ImGuiCond_Always);
+                    ImPlot::PushStyleVar(ImPlotStyleVar_LineWeight, 2.5f);
                     ImPlot::PlotLine("Theoretical Value", tdata1,tdata2,20);
+                    ImPlot::PopStyleVar();
                     ImPlot::SetNextFillStyle(ImVec4(0.2f,0.5f,1.0f,1.0f),0.25f);
                     if (rdata.Data.size() > 0){
+                    ImPlot::PushStyleVar(ImPlotStyleVar_LineWeight, 2.5f);
+                    ImPlot::PushStyleColor(ImPlotCol_Line, ImVec4(1.0f, 1.0f, 0.0f, 1.0f));
                     ImPlot::PlotLine("Estimate Value", &rdata.Data[0].x, &rdata.Data[0].y, rdata.Data.size(), 0, 0, 2 * sizeof(float));
+                    ImPlot::PopStyleColor();
+                    ImPlot::PopStyleVar();
                     }
                     ImPlot::EndPlot();
                 }}
@@ -407,8 +413,12 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
                     ImPlot::SetupAxisLimits(ImAxis_X1,0,simParams.iterations, ImGuiCond_Always);
                     ImPlot::SetupAxisLimits(ImAxis_Y1,ymin_e,ymax_e ,ImGuiCond_Always);
                     if (rdata.Data.size() > 0){
+                    ImPlot::PushStyleVar(ImPlotStyleVar_LineWeight, 2.5f);
+                    ImPlot::PushStyleColor(ImPlotCol_Line, ImVec4(0.8f, 0.3f, 1.0f, 1.0f));
                     ImPlot::PlotLine("Absolute Error", &edata.Data[0].x, &edata.Data[0].y, edata.Data.size(), 0, 0, 2 * sizeof(float));
                     }
+                    ImPlot::PopStyleColor();
+                    ImPlot::PopStyleVar();
                     ImPlot::EndPlot();
                 }}
         }
@@ -484,12 +494,18 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
         
         ImPlot::SetupAxes("Number of Paths (log scale)", "Standard Error");
 
+        ImPlot::PushStyleVar(ImPlotStyleVar_LineWeight, 2.5f);
+        ImPlot::PushStyleColor(ImPlotCol_Line, ImVec4(1.0f, 1.0f, 0.0f, 1.0f));
+
         ImPlot::PlotLine(
             "SE vs Paths",
             resultsCache.convergencePaths.data(),
             resultsCache.convergenceSE.data(),
             resultsCache.convergencePaths.size()
         );
+
+        ImPlot::PopStyleColor();
+        ImPlot::PopStyleVar();
 
         ImPlot::EndPlot();
     }}
