@@ -132,6 +132,20 @@ if (ImGui::BeginTable("OptionInputsTable", 2, ImGuiTableFlags_SizingStretchProp)
     ImGui::SetNextItemWidth(-FLT_MIN);
     ImGui::SliderInt("##paths", &no_of_paths, 30, 1000000,"%d",ImGuiSliderFlags_AlwaysClamp); // minimum is 30 to meet central limit theorm requirements 
 
+
+    ImGui::EndTable();
+
+
+}
+
+ImGui::SeparatorText("Simulation Inputs");
+
+// Table for simulation parameters.
+if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretchProp))
+{
+    ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_WidthStretch, 0.6f);
+    ImGui::TableSetupColumn("Input", ImGuiTableColumnFlags_WidthStretch, 0.6f);
+
     // Available simulation engine choices.
     const char* models[] =
     {
@@ -153,19 +167,6 @@ if (ImGui::BeginTable("OptionInputsTable", 2, ImGuiTableFlags_SizingStretchProp)
     {
         simParams.modelType = static_cast<ModelType>(current_model);
     }
-
-    ImGui::EndTable();
-
-
-}
-
-ImGui::SeparatorText("Simulation Inputs");
-
-// Table for simulation parameters.
-if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretchProp))
-{
-    ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_WidthStretch, 0.6f);
-    ImGui::TableSetupColumn("Input", ImGuiTableColumnFlags_WidthStretch, 0.6f);
     
     
     ImGui::TableNextRow();
