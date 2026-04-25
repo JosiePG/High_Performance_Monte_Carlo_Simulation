@@ -14,15 +14,9 @@ target_include_directories(main PRIVATE
     src
 )
 
-if (MSVC)
-    target_compile_options(main PRIVATE /arch:AVX2 /openmp:llvm)
-else()
-    target_compile_options(main PRIVATE -mavx2 -fopenmp)
-endif()
+target_compile_options(main PRIVATE /arch:AVX2 /openmp:llvm)
 
-
-
-
+file(COPY ${CMAKE_SOURCE_DIR}/fonts DESTINATION ${CMAKE_BINARY_DIR})
 
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
