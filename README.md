@@ -5,37 +5,64 @@
 This project uses:
 
 * MSVC (Visual Studio Build Tools)
-* CMake presets
-* Ninja as the build system
-* vcpkg for dependencies
+* CMake (with presets)
+* Ninja build system
+* vcpkg for dependency management
 
+---
 
 ## 1. Prerequisites
 
-Make sure you have installed:
+Ensure the following are installed:
 
-* CMake
-* Visual Studio Build Tools
-* Ninja build system
+* CMake (>= 3.20)
+* Visual Studio 2022 **(Desktop development with C++)** or Build Tools
+* Git
 * vcpkg
+* Ninja (see below)
 
 ---
 
-## 2. How to install vcpkg (if not already)
+## 2. Install Ninja
+
+Ninja is required as the build system.
+
+**Option 1 (Recommended – via package manager):**
+
+```bash
+choco install ninja
+```
+
+**Option 2 (Manual install):**
+
+* Download from: https://github.com/ninja-build/ninja/releases
+* Add the executable to your system PATH
+
+To verify installation:
+
+```bash
+ninja --version
+```
+
+---
+
+## 3. Install vcpkg (if not already installed)
 
 ```bash
 git clone https://github.com/microsoft/vcpkg
+cd vcpkg
+bootstrap-vcpkg.bat
 ```
 
-Then bootstrap:
+Set the environment variable (required):
 
 ```bash
-./vcpkg/bootstrap-vcpkg.bat
+set VCPKG_ROOT=C:\path\to\vcpkg
 ```
 
 ---
 
-## 3. Install dependencies
+## 4. Install dependencies
 
 From the project root:
 
@@ -47,33 +74,51 @@ Dependencies are defined in `vcpkg.json`.
 
 ---
 
-## 4. Opening project
+## 5. Important: MSVC Environment
 
-You must open VS Code with the MSVC environment loaded:
+This project requires the MSVC compiler (`cl.exe`), so all commands must be run from:
 
-1. Open:
-
-   ```
-   x64 Native Tools Command Prompt for VS 2022
-   ```
-
-2. Navigate to your project:
-
-```bash
-cd path/to/your/project
 ```
-
-3. Launch VS Code:
-
-```bash
-code .
+x64 Native Tools Command Prompt for VS 2022
 ```
 
 ---
 
-## 5. Configure project (using presets)
+## 6. Build via Command Line (Recommended)
 
-In VS Code:
+From the project root:
+
+```bash
+cmake --preset msvc-relwithdebinfo
+cmake --build --preset msvc-relwithdebinfo
+```
+
+---
+
+## 7. Run the Executable
+
+```bash
+cd out/build/msvc-relwithdebinfo
+main.exe
+```
+
+---
+
+## 8. Using VS Code (Optional)
+
+1. Open **x64 Native Tools Command Prompt for VS 2022**
+2. Navigate to project:
+
+   ```bash
+   cd path/to/project
+   ```
+3. Launch VS Code:
+
+   ```bash
+   code .
+   ```
+
+Inside VS Code:
 
 * Press `Ctrl + Shift + P`
 * Select:
@@ -91,56 +136,29 @@ Then run:
 
 ```
 CMake: Configure
-```
-
----
-
-## 6. Build
-
-```
 CMake: Build
 ```
 
-Or via terminal:
-
-```bash
-cmake --build out/build/msvc-relwithdebinfo
-```
-
 ---
 
-## 7. Run
-
-Executable will be located in:
-
-```
-out/build/msvc-relwithdebinfo/
-```
-
-Run:
-
-```bash
-./main.exe
-```
-
----
-
-##  Build Types
+## 9. Build Types
 
 * `Debug` → debugging only (slow)
 * `Release` → maximum performance
-* `RelWithDebInfo` →  recommended (fast + debuggable)
+* `RelWithDebInfo` → recommended (performance + debugging symbols)
 
 ---
 
-## Performance Notes
+## 10. Performance Notes
 
-This project enables:
+This project makes use of:
 
 * AVX2 vectorization (`/arch:AVX2`)
 * OpenMP parallelism (`/openmp:llvm`)
+* Cache-aware data layout
+* SIMD intrinsics (AVX2)
 
-For accurate performance measurements, use:
+For accurate benchmarking, use:
 
 ```
 RelWithDebInfo or Release
@@ -148,9 +166,32 @@ RelWithDebInfo or Release
 
 ---
 
-## Project Structure
+## 11. Runtime Notes
+
+* The executable must be run from the build directory:
+
+  ```
+  out/build/msvc-relwithdebinfo
+  ```
+* Ensure any required assets (e.g., fonts) are located relative to the executable.
+
+---
+
+## 12. Project Structure
 
 * `src/` → source files
 * `CMakeLists.txt` → build configuration
 * `CMakePresets.json` → build presets
 * `vcpkg.json` → dependency definitions
+
+---
+
+## Notes for Markers
+
+* The project has been tested on Windows with MSVC + Ninja.
+* If build issues occur, ensure:
+
+  * MSVC environment is loaded
+  * `VCPKG_ROOT` is set correctly
+  * Ninja is installed and available in PATH
+  * Dependencies are installed via `vcpkg install`
