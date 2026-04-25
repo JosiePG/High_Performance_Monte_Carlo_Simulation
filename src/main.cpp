@@ -1,10 +1,3 @@
-
-//TODO :
-// add to project log and clean it up
-// clean up code ( make sure namings make sense eg model / engine )
-// bonuses
-// fix mean and min time bug not appearing sometimes in sim history
-
 #include "black_scholes_model.h"
 #include "monte_carlo_engine.h"
 #include "option_parameters.h"
@@ -64,47 +57,3 @@ int main() {
 
 
 }
-
-// profiling code
-
-// int main() {
-// OptionParameters optParams;
-
-// optParams.spotPrice      = 100.0;   // S0
-// optParams.strikePrice    = 100.0;   // K (ATM option)
-// optParams.timeToMaturity = 1.0;     // 1 year
-// optParams.riskFreeRate   = 0.05;    // 5%
-// optParams.volatility     = 0.2;     // 20%
-// optParams.optionType     = OptionType::CALL;    // assume 0 = call
-
-// int no_of_paths = 1000000000;
-
-//      MonteCarloEngine<XoshiroPerThreadGenerator,
-//                      AntitheticVariateSampling,
-//                      OpenMPParallelExecutionPolicy>
-//                      ultimateEngine;
-
-
-//     auto result = ultimateEngine.price(no_of_paths, optParams);
-//     return 0;
-// }
-    // MonteCarloEngine<StandardMersenneTwisterGenerator,
-    //              PlainMonteCarloSampling,
-    //              SerialExecutionPolicy>
-    //                  vanillaEngine;
-//     MonteCarloEngine<StandardMersenneTwisterGenerator,
-//                      AntitheticVariateSampling,
-//                      SerialExecutionPolicy>
-//                      varianceEngine;
-//     MonteCarloEngine<XoshiroSingleThreadedGenerator,
-//                  PlainMonteCarloSampling,
-//                  CacheAwareVectorizedExecutionPolicy>
-//                      cacheEngine;
-// MonteCarloEngine<XoshiroPerThreadGenerator,
-//                  PlainMonteCarloSampling,
-//                  OpenMPParallelExecutionPolicy>
-//                      parallelEngine;
-//      MonteCarloEngine<XoshiroPerThreadGenerator,
-//                      AntitheticVariateSampling,
-//                      OpenMPParallelExecutionPolicy>
-//                      parallel_and_varianceEngine;
