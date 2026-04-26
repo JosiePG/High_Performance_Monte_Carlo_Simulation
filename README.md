@@ -5,8 +5,7 @@
 This project uses:
 
 * MSVC (Visual Studio Build Tools)
-* CMake (with presets)
-* Ninja build system
+* CMake
 * vcpkg for dependency management
 
 ---
@@ -16,37 +15,13 @@ This project uses:
 Ensure the following are installed:
 
 * CMake (>= 3.20)
-* Visual Studio 2022 **(Desktop development with C++)** or Build Tools
+* Visual Studio 2022 / 2026 **(Desktop development with C++)**
 * Git
 * vcpkg
-* Ninja (see below)
 
 ---
 
-## 2. Install Ninja
-
-Ninja is required as the build system.
-
-**Option 1 (Recommended – via package manager):**
-
-```bash
-choco install ninja
-```
-
-**Option 2 (Manual install):**
-
-* Download from: https://github.com/ninja-build/ninja/releases
-* Add the executable to your system PATH
-
-To verify installation:
-
-```bash
-ninja --version
-```
-
----
-
-## 3. Install vcpkg (if not already installed)
+## 2. Install vcpkg (if not already installed)
 
 ```bash
 git clone https://github.com/microsoft/vcpkg
@@ -54,7 +29,7 @@ cd vcpkg
 bootstrap-vcpkg.bat
 ```
 
-Set the environment variable (required):
+Set the environment variable:
 
 ```bash
 set VCPKG_ROOT=C:\path\to\vcpkg
@@ -62,7 +37,7 @@ set VCPKG_ROOT=C:\path\to\vcpkg
 
 ---
 
-## 4. Install dependencies
+## 3. Install dependencies
 
 From the project root:
 
@@ -74,124 +49,205 @@ Dependencies are defined in `vcpkg.json`.
 
 ---
 
-## 5. Important: MSVC Environment
+## 4. Important: MSVC Environment
 
-This project requires the MSVC compiler (`cl.exe`), so all commands must be run from:
+All commands **must** be run from:
 
 ```
-x64 Native Tools Command Prompt for VS 2022
+x64 Native Tools Command Prompt for Visual Studio
 ```
+
+This ensures the MSVC compiler (`cl.exe`) is available.
 
 ---
 
-## 6. Build via Command Line (Recommended)
+# 5. Build via Command Line (Recommended)
 
 From the project root:
 
 ```bash
-cmake --preset msvc-relwithdebinfo
-cmake --build --preset msvc-relwithdebinfo
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
 ```
 
 ---
 
-## 7. Run the Executable
+## 6. Run the Executable
 
 ```bash
-cd out/build/msvc-relwithdebinfo
+cd build/Release
 main.exe
 ```
 
 ---
 
-## 8. Using VS Code (Optional)
+# 7. Using VS Code (Optional)
 
-1. Open **x64 Native Tools Command Prompt for VS 2022**
-2. Navigate to project:
+## Step 1: Open correct environment
 
-   ```bash
-   cd path/to/project
+1. Open:
+
    ```
+   x64 Native Tools Command Prompt for Visual Studio
+   ```
+
+2. Navigate to the project:
+
+```bash
+cd path/to/project
+```
+
 3. Launch VS Code:
 
-   ```bash
-   code .
-   ```
+```bash
+code .
+```
 
-Inside VS Code:
+---
+
+## Step 2: Select compiler
+
+In VS Code:
 
 * Press `Ctrl + Shift + P`
-* Select:
+* Search:
 
   ```
-  CMake: Select Configure Preset
+  CMake: Scan for Kits
+  ```
+* Then:
+
+  ```
+  CMake: Select a Kit
   ```
 * Choose:
 
   ```
-  msvc-relwithdebinfo
+  Visual Studio (MSVC) - x64
   ```
 
-Then run:
+---
+
+## Step 3: Configure and build
+
+* Press `Ctrl + Shift + P`
+* Run:
+
+  ```
+  CMake: Configure
+  ```
+* Then:
+
+  ```
+  CMake: Build
+  ```
+
+---
+
+## Step 4: Run
+
+The executable will be in:
 
 ```
-CMake: Configure
-CMake: Build
+build/Debug/
+```
+
+or
+
+```
+build/Release/
+```
+
+Run:
+
+```bash
+./main.exe
 ```
 
 ---
 
-## 9. Build Types
+## 8. Build Types
 
 * `Debug` → debugging only (slow)
 * `Release` → maximum performance
-* `RelWithDebInfo` → recommended (performance + debugging symbols)
+* `RelWithDebInfo` → recommended (performance + debug symbols)
+
+Example:
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
+cmake --build build --config RelWithDebInfo
+```
 
 ---
 
-## 10. Performance Notes
+## 9. Performance Notes
 
-This project makes use of:
+This project includes:
 
 * AVX2 vectorization (`/arch:AVX2`)
-* OpenMP parallelism (`/openmp:llvm`)
-* Cache-aware data layout
-* SIMD intrinsics (AVX2)
+* OpenMP parallelism (`/openmp`)
+* Cache-aware memory access patterns
+* Explicit SIMD intrinsics (AVX2)
 
-For accurate benchmarking, use:
+For benchmarking, use:
 
 ```
-RelWithDebInfo or Release
+Release or RelWithDebInfo
 ```
 
 ---
 
-## 11. Runtime Notes
+## 10. Runtime Notes
 
 * The executable must be run from the build directory:
 
   ```
-  out/build/msvc-relwithdebinfo
+  build/Release
   ```
-* Ensure any required assets (e.g., fonts) are located relative to the executable.
+* Fonts and assets are automatically copied next to the executable during build.
+* Do not move the executable outside the build folder.
 
 ---
 
-## 12. Project Structure
+## 11. Project Structure
 
 * `src/` → source files
+* `fonts/` → runtime assets
 * `CMakeLists.txt` → build configuration
-* `CMakePresets.json` → build presets
 * `vcpkg.json` → dependency definitions
 
 ---
 
 ## Notes for Markers
 
-* The project has been tested on Windows with MSVC + Ninja.
-* If build issues occur, ensure:
+* The project has been tested using:
 
-  * MSVC environment is loaded
-  * `VCPKG_ROOT` is set correctly
-  * Ninja is installed and available in PATH
-  * Dependencies are installed via `vcpkg install`
+  * MSVC (Visual Studio Build Tools)
+  * CMake (default Visual Studio generator)
+  * vcpkg (manifest mode)
+
+If build issues occur:
+
+* Ensure you are using:
+
+  ```
+  x64 Native Tools Command Prompt
+  ```
+* Ensure `VCPKG_ROOT` is set correctly
+* Run:
+
+  ```bash
+  vcpkg install
+  ```
+
+---
+
+## Quick Start (Recommended)
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+cd build/Release
+main.exe
+```
