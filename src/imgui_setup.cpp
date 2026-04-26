@@ -258,7 +258,7 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
 
     ImGui::End();
 
-
+    ImGui::SetNextWindowPos(ImVec2(750, 15), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(1150, 950), ImGuiCond_Always);
 
 
@@ -473,6 +473,7 @@ if (ImGui::BeginTable("Simulation Inputs Table", 2, ImGuiTableFlags_SizingStretc
 
             
 
+     ImGui::SetNextWindowPos(ImVec2(750, 15), ImGuiCond_FirstUseEver);
      ImGui::SetNextWindowSize(ImVec2(1150, 950), ImGuiCond_Always);
 
      // Creates separate window for standard-error convergence plot.
