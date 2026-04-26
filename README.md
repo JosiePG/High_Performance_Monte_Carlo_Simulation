@@ -13,7 +13,7 @@ If you do not wish to build the project from source, you can download the pre-co
 
 ### Backup
 
-If the OneDrive link is inaccessible, the same release is included in the repository under the release_backup folder.
+If you are unable to access the OneDrive link, a copy of the release is also included in the repository under the release_backup folder.
 
 ## Prerequisites
 - Windows 10/11
