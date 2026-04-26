@@ -19,7 +19,19 @@ Ensure the following are installed:
 * Git
 * vcpkg
 
+### CPU Requirement (AVX2)
+
+This executable requires a CPU with **AVX2 support**.
+
+### Check Support (PowerShell)
+
+```powershell
+Get-CimInstance Win32_Processor | Select-Object Name
+
+Search your CPU model online and confirm that AVX2 is listed, most modern Intel & AMD CPUs since 2013 support it.
+
 ---
+
 
 ## 2. Install vcpkg (if not already installed)
 
