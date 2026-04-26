@@ -57,6 +57,7 @@ void UseImGui::Update(SimulationHelper & simHelper){
     cachedIsRunning = simHelper.IsRunning();
 
 
+    ImGui::SetNextWindowPos(ImVec2(10, 15), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(710, 650), ImGuiCond_Always);
 
 
