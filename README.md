@@ -4,7 +4,7 @@
 If you do not wish to build the project from source, you can download the pre-compiled executable:
 
 ## How to Run
-1. Click on Releases tab in Gitlab
+1. Click on Release tab in Gitlab
 2. Click on the OneDrive Link Monte Carlo Engine Release v1.0.0 attached to this release (Must use University of Leicester email).
 3. Download the "jg535_release " file
 4. Extract the contents to a folder on your computer.
@@ -14,6 +14,8 @@ If you do not wish to build the project from source, you can download the pre-co
 ## Prerequisites
 - Windows 10/11
 - Microsoft Visual C++ (if missing, download from [Microsoft](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist))
+
+---
 
 ## Build Instructions
 
@@ -215,8 +217,6 @@ This project includes:
 
 * AVX2 vectorization (`/arch:AVX2`)
 * OpenMP parallelism (`/openmp`)
-* Cache-aware memory access patterns
-* Explicit SIMD intrinsics (AVX2)
 
 For benchmarking, use:
 
