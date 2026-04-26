@@ -11,6 +11,10 @@ If you do not wish to build the project from source, you can download the pre-co
 5. Ensure that `glfw3.dll` and the `fonts/` directory are in the same folder as `main.exe`.
 6. Double-click `main.exe` to launch the application.
 
+### Backup
+
+If the OneDrive link is inaccessible, the same release is included in the repository under the release_backup folder.
+
 ## Prerequisites
 - Windows 10/11
 - Microsoft Visual C++ (if missing, download from [Microsoft](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist))
