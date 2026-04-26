@@ -1,5 +1,20 @@
 # High Performance Monte Carlo Simulation for Low-Latency European Option Pricing
 
+## Download Executable
+If you do not wish to build the project from source, you can download the pre-compiled executable:
+
+## How to Run
+1. Click on Releases tab in Gitlab
+2. Click on the OneDrive Link Monte Carlo Engine Release v1.0.0 attached to this release (Must use University of Leicester email).
+3. Download the "jg535_release " file
+4. Extract the contents to a folder on your computer.
+5. Ensure that `glfw3.dll` and the `fonts/` directory are in the same folder as `main.exe`.
+6. Double-click `main.exe` to launch the application.
+
+## Prerequisites
+- Windows 10/11
+- Microsoft Visual C++ (if missing, download from [Microsoft](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist))
+
 ## Build Instructions
 
 This project uses:
