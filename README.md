@@ -11,7 +11,7 @@ An interactive benchmarking application (Dear ImGui / ImPlot) sits on top of the
 engine, allowing any of the five configurations to be run, compared, and visualised
 in real time.
 
-![Simulation benchmarking UI](images/readme_demo.png)
+![Simulation benchmarking UI](images/readme_demo.gif)
 
 ---
 
