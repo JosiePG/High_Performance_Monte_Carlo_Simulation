@@ -23,7 +23,7 @@ rate of O(N⁻¹ᐟ²), meaning a 10x reduction in error requires 100x more simu
 That cost is significant wherever pricing has to happen repeatedly and fast: real-time
 trading, risk management, or portfolios of exotic derivatives.
 
-This project does not attempt to "beat" the black-scholes model (which is impossible) instead, this project asks a specific question: **how much of that cost can be engineered away,
+This project asks a specific question: **how much of that cost can be engineered away,
 layer by layer, and what does each layer actually cost or save?** Rather than building
 one "optimised" engine, five engines were built as an explicit ladder each isolating
 one variable so the contribution of each optimisation could be measured independently
@@ -48,66 +48,44 @@ reference price of **9.4134**.
 
 Every engine's 95% confidence interval contained the true Black–Scholes price, and
 every engine held standard error below the 1.5×10⁻² target at 10⁶ paths.
-
----
-
-## Architecture
-
-The engine is expressed as `MonteCarloEngine<RngPolicy, SamplingPolicy, ExecutionPolicy>`
-— a C++ template parametrised over three independent, compile-time-resolved axes:
-how random numbers are generated, how each path contributes to the estimator, and
-how paths are distributed across hardware. Because policies resolve at compile time
-rather than through virtual dispatch, the compiler can fully inline the hot path,
-giving a "zero-cost abstraction" over five very different execution strategies.
-
-![System architecture](images/architecture.png)
-
-This decomposition is what makes the results table above meaningful: each engine
-differs from its neighbour by exactly one policy, so a performance or accuracy
-delta can be attributed to a specific, named cause rather than a bundle of changes.
-
 ---
 
 ## What the profiling actually shows
-
+ 
 Empirical wall-clock benchmarking tells you *that* something is faster. Hardware
 profiling with Intel VTune (Hotspots, Memory Access, and Performance Snapshot
-analyses) was used to explain *why* down to which functions, cache levels, and
+analyses) was used to explain *why*, down to which functions, cache levels, and
 CPU pipeline slots the time was going to.
-
+ 
 **The bottleneck moves as optimisations are applied.** In the vanilla engine, the
 Mersenne Twister generator and its normal-distribution transform account for ~39%
-of CPU time — the engine is memory-bound, repeatedly loading a ~2.5 KB generator
+of CPU time, proving that the engine is memory-bound, repeatedly loading a ~2.5 KB generator
 state. Replacing it with the 32-byte xoshiro256++ generator and adding AVX2 SIMD
 shifts the profile from memory-bound to compute-bound: Core Bound (13.0%) overtakes
 Memory Bound (10.2%) for the first time, with `exp()` becoming the dominant cost.
-
+ 
 ![CPU hotspot breakdown by engine](images/cpu-hotspot-breakdown.png)
 ![Memory-bound to compute-bound transition](images/memory-core-bound.png)
-
-**The variance reduction / speed trade-off is precisely quantifiable.** Antithetic
-variates halve estimator variance (47% SE reduction) but double the number of
-`std::exp()` calls per path, which VTune attributes to an 18.4% increase in retired
-instructions (275.3B → 325.9B at N = 10⁹) — a direct, measured cost for a direct,
-measured accuracy gain, and one that holds constant whether the engine is serial or
-parallel.
-
-**Parallelism doesn't just add speed — it removes memory pressure entirely.**
+ 
+**Parallelism reduces latency and removes memory pressure entirely.**
 Because each OpenMP thread owns a private xoshiro256++ generator (32 bytes — small
 enough to live in L1 cache) and a private accumulator, there's no shared mutable
-state between threads. This drives an 87% reduction in last-level cache misses and
-cuts DRAM-bound cycles from 12.8% (vanilla) to 1.9% (parallel), while aggregate
-floating-point throughput rises 7.1x, from 0.704 to 4.976 DP GFLOPS.
-
-![Floating-point throughput scaling](images/gflops-throughput.png)
-
+state between threads. This drives an **87% reduction in last-level cache misses**
+(6.75M → 0.45M) and cuts **DRAM-bound cycles from 12.8% to 1.9%** of clock ticks
+between the vanilla and fully-parallel engines, direct hardware confirmation that
+the per-thread generator design achieves its intended cache-locality goal, not just
+a wall-clock speed-up.
+ 
+![Last-level cache misses by engine](images/llc-cache-misses.png)
+![DRAM-bound cycles by engine](images/dram-bound.png)
+ 
 The convergence plot below confirms the theoretical O(N⁻¹ᐟ²) Monte Carlo convergence
 rate empirically, and visually demonstrates the antithetic engine's lower error curve
 relative to the baseline at every path count.
-
+ 
 ![Standard error convergence](images/convergence-plot.png)
-
-
+ 
+---
 
 ## Download & Run (pre-built executable)
 
