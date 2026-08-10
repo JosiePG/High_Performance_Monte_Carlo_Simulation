@@ -107,30 +107,7 @@ relative to the baseline at every path count.
 
 ![Standard error convergence](images/convergence-plot.png)
 
----
 
-## Engineering highlights
-
-- **Policy-based, template-driven engine composition** — five engine configurations
-  built from three independently swappable policies, with zero virtual-dispatch
-  overhead in the hot path.
-- **Manual AVX2 SIMD vectorisation** via `<immintrin.h>` intrinsics, computing the
-  GBM exponent argument for four paths per FMA instruction rather than relying on
-  (unreliable) compiler auto-vectorisation.
-- **Cache-aware design**: aligned `alignas(32)` buffers for SIMD access, and a
-  register-resident xoshiro256++ generator chosen specifically to minimise memory
-  traffic.
-- **Lock-free parallel accumulation** under OpenMP — thread-local generators and
-  `reduction()`-based accumulation eliminate the need for locks or atomics inside
-  the hot loop entirely.
-- **Thread-safe, responsive UI** — the simulation runs on a background thread;
-  shared state is synchronised via mutex with intermittent, throttled publishing
-  to avoid lock contention, while `std::atomic` flags handle cancellation and
-  progress reporting without any locking at all.
-- **Hardware-level validation**, not just wall-clock benchmarking — every
-  performance claim above is backed by VTune PMU counters, not just timers.
-
----
 
 ## Download & Run (pre-built executable)
 
