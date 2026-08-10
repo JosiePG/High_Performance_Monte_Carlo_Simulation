@@ -46,7 +46,7 @@ reference price of **9.4134**.
 | + OpenMP + variance reduction | **3.10x** | 0.0074 | 47.3% |
 ---
 
-## Neat Profiling results
+## Profiling results
  
  
 **Parallelism reduces latency and removes memory pressure entirely.**
