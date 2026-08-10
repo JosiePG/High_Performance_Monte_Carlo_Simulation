@@ -4,8 +4,7 @@ A C++23 Monte Carlo pricing engine for European options, built around a policy-b
 compile-time composable architecture. The project isolates the contribution of five
 distinct optimisation layers: variance reduction, cache-aware design, AVX2 SIMD
 vectorisation, and OpenMP parallelism , and validates each one empirically against
-the analytical Black–Scholes price, then explains *why* it performs the way it does
-using hardware-level profiling with Intel VTune.
+the analytical Black–Scholes price.
 
 An interactive benchmarking application (Dear ImGui / ImPlot) sits on top of the
 engine, allowing any of the five configurations to be run, compared, and visualised
@@ -45,45 +44,21 @@ reference price of **9.4134**.
 | + Cache-aware / AVX2 SIMD | **1.49x** | 0.0141 | — |
 | + OpenMP parallelism | **3.54x** | 0.0141 | — |
 | + OpenMP + variance reduction | **3.10x** | 0.0074 | 47.3% |
-
-Every engine's 95% confidence interval contained the true Black–Scholes price, and
-every engine held standard error below the 1.5×10⁻² target at 10⁶ paths.
 ---
 
-## What the profiling actually shows
+## Neat Profiling results
  
-Empirical wall-clock benchmarking tells you *that* something is faster. Hardware
-profiling with Intel VTune (Hotspots, Memory Access, and Performance Snapshot
-analyses) was used to explain *why*, down to which functions, cache levels, and
-CPU pipeline slots the time was going to.
- 
-**The bottleneck moves as optimisations are applied.** In the vanilla engine, the
-Mersenne Twister generator and its normal-distribution transform account for ~39%
-of CPU time, proving that the engine is memory-bound, repeatedly loading a ~2.5 KB generator
-state. Replacing it with the 32-byte xoshiro256++ generator and adding AVX2 SIMD
-shifts the profile from memory-bound to compute-bound: Core Bound (13.0%) overtakes
-Memory Bound (10.2%) for the first time, with `exp()` becoming the dominant cost.
- 
-![CPU hotspot breakdown by engine](images/cpu-hotspot-breakdown.png)
-![Memory-bound to compute-bound transition](images/memory-core-bound.png)
  
 **Parallelism reduces latency and removes memory pressure entirely.**
 Because each OpenMP thread owns a private xoshiro256++ generator (32 bytes — small
 enough to live in L1 cache) and a private accumulator, there's no shared mutable
 state between threads. This drives an **87% reduction in last-level cache misses**
 (6.75M → 0.45M) and cuts **DRAM-bound cycles from 12.8% to 1.9%** of clock ticks
-between the vanilla and fully-parallel engines, direct hardware confirmation that
-the per-thread generator design achieves its intended cache-locality goal, not just
-a wall-clock speed-up.
+between the vanilla and fully-parallel engines.
  
 ![Last-level cache misses by engine](images/llc-cache-misses.png)
 ![DRAM-bound cycles by engine](images/dram-bound.png)
  
-The convergence plot below confirms the theoretical O(N⁻¹ᐟ²) Monte Carlo convergence
-rate empirically, and visually demonstrates the antithetic engine's lower error curve
-relative to the baseline at every path count.
- 
-![Standard error convergence](images/convergence-plot.png)
  
 ---
 
@@ -191,43 +166,3 @@ vcpkg.json      dependency definitions
 ```
 
 ---
-
-## Environment used for benchmarking
-
-All performance figures quoted above were measured on a single fixed machine to
-keep comparisons valid — differences between engines reflect algorithmic choices,
-not hardware variance.
-
-| | |
-|---|---|
-| CPU | 11th Gen Intel Core i5-1135G7 (4 cores / 8 threads) |
-| Clock | 2.40 GHz base, up to 4.20 GHz Turbo |
-| RAM | 16 GB |
-| Cache | L1: 320 KB · L2: 5 MB · L3: 8 MB |
-| Compiler | MSVC |
-| Profiler | Intel VTune Profiler 2024.2 |
-
----
-
-## Future work
-
-- **SIMD-vectorised `exp()`** — the exponential evaluation is the dominant
-  floating-point cost across every engine; a vectorised implementation (rather
-  than scalar `std::exp`) is the clearest remaining performance win.
-- **Path-dependent payoffs** (e.g. Asian options), where Monte Carlo is used in
-  practice precisely because no closed-form solution exists, and where the
-  performance differences between engines become commercially significant.
-- **GPU acceleration** (CUDA/OpenCL) — Monte Carlo path simulation maps directly
-  onto the SIMT execution model, and would likely yield order-of-magnitude gains
-  over the CPU-parallel engines at large path counts.
-
----
-
-## References
-
-Core theoretical grounding: Black & Scholes (1973) on closed-form option pricing;
-Boyle (1977) and Glasserman, *Monte Carlo Methods in Financial Engineering* (2004)
-on Monte Carlo methods in finance; Hammersley & Morton (1956) on antithetic
-variates; Blackman & Vigna (2021) on the xoshiro PRNG family; and Hennessy &
-Patterson, *Computer Architecture: A Quantitative Approach* (2017), for the
-memory-bound/core-bound pipeline analysis framework used in Section 6.
