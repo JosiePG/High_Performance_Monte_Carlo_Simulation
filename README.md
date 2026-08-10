@@ -50,13 +50,11 @@ reference price of **9.4134**.
  
  
 **Parallelism reduces latency and removes memory pressure entirely.**
-Because each OpenMP thread owns a private xoshiro256++ generator (32 bytes — small
+Because each OpenMP thread owns a private xoshiro256++ generator (32 bytes, so small
 enough to live in L1 cache) and a private accumulator, there's no shared mutable
-state between threads. This drives an **87% reduction in last-level cache misses**
-(6.75M → 0.45M) and cuts **DRAM-bound cycles from 12.8% to 1.9%** of clock ticks
+state between threads. Which cuts **DRAM-bound cycles from 12.8% to 1.9%** of clock ticks
 between the vanilla and fully-parallel engines.
  
-![Last-level cache misses by engine](images/llc-cache-misses.png)
 ![DRAM-bound cycles by engine](images/dram-bound.png)
  
  
